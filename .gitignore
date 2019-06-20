@@ -1,15 +1,18 @@
-# Compiled class file
-*.class
+local-*
+.idea
+*.iml
+.gradle
+build/
+out/
 
-# Log file
-*.log
+# Ignore Gradle GUI config
+gradle-app.setting
 
-# BlueJ files
-*.ctxt
+# Cache of project
+.gradletasknamecache
 
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
+# # Work around https://youtrack.jetbrains.com/issue/IDEA-116898
+# gradle/wrapper/gradle-wrapper.properties
 # Package Files #
 *.jar
 *.war
@@ -19,5 +22,10 @@
 *.tar.gz
 *.rar
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
+.settings
+.project
+.classpath
+bin
+
+.vscode
+.DS_Store

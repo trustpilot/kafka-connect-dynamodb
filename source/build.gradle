@@ -1,0 +1,10 @@
+description = "Kafka Connect Source plugin that reads from DynamoDB streams"
+
+dependencies {
+    implementation 'com.google.code.gson:gson:2.8.2'
+    implementation 'com.amazonaws:aws-java-sdk-resourcegroupstaggingapi:1.11.551'
+
+    compile group: 'org.apache.kafka', name: 'connect-api', version: "${rootProject.ext.kafkaConnectApiVersion}"
+    compile group: 'com.amazonaws', name: 'amazon-kinesis-client', version: '1.9.1'
+    compile group: 'com.amazonaws', name: 'dynamodb-streams-kinesis-adapter', version: '1.4.0'
+}

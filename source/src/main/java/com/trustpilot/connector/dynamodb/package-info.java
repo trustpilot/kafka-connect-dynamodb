@@ -1,0 +1,1 @@
+package com.trustpilot.connector.dynamodb;

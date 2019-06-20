@@ -1,0 +1,20 @@
+language: java
+
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+script:
+  - ./gradlew build --build-cache -PwarningsAsErrors=true
+  - ./gradlew shadowJar
+
+deploy:
+  provider: releases
+  api_key: "$GITHUB_TOKEN"
+  file: "build/libs/datalake-kafka-connect-dynamodb-${TRAVIS_TAG}.jar"
+  skip_cleanup: true
+  on:
+    tags: true

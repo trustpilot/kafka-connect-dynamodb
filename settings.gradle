@@ -1,0 +1,3 @@
+rootProject.name = 'kafka-connect-dynamodb'
+
+include "source"
