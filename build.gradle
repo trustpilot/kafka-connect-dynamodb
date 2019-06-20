@@ -22,7 +22,7 @@ description = "kafka-connect-dynamodb"
 
 allprojects {
     group "com.trustpilot.kafka.connect.dynamodb"
-    version = versionDetails().lastTag.replaceAll(/^v/,'')
+    version = gitVersion()
 
     repositories {
         jcenter()
