@@ -136,7 +136,7 @@ Releases are done by creating new release(aka tag) via Github user interface. On
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
 
 ## Acknowledgments
 
