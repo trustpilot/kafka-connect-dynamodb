@@ -2,17 +2,17 @@
 
 # kafka-connect-dynamodb
 
-A plug-in for the [Kafka Connect framework](https://kafka.apache.org/documentation.html#connect) which implements a "source connector" for DynamoDB table Streams. This source connector extends [Confluent ecosystem](https://www.confluent.io/hub/) and allows replicating DynamoDB tables into Kafka topics. Once data is in Kafka you can use various Confluent sink connectors to push this data to different destinations systems for e.g. into BigQuery for easy analytics.  
+A [Kafka Connector](http://kafka.apache.org/documentation.html#connect) which implements a "source connector" for AWS DynamoDB table Streams. This source connector allows replicating DynamoDB tables into Kafka topics. Once data is in Kafka you can use various Kafka  sink connectors to push this data to different destinations systems, e.g. - BigQuery for easy analytics.  
 
-## Additional features
+## Notable features
 * `autodiscovery` - monitors and automatically discovers DynamoDB tables to start/stop syncing from (based on AWS  TAG's)
-* `INIT_SYNC` - automatically detects and if needed performs initial(existing) data replication before continuing tracking changes from the Stream
+* `initial sync` - automatically detects and if needed performs initial(existing) data replication before tracking changes from the DynamoDB table stream
   
 ## Alternatives 
 
-We found only one existing alternative implementation by [shikhar](https://github.com/shikhar/kafka-connect-dynamodb), but it seems to be missing major features and is no longer supported. 
+Prior our development we found only one existing implementation by [shikhar](https://github.com/shikhar/kafka-connect-dynamodb), but it seems to be missing major features (initial sync, handling shard changes) and is no longer supported. 
 
-Also it tries to manage DynamoDB Stream shards manually by using one Connect task to read from each DynamoDB Streams shard, but since DynamoDB Stream shards are dynamic compared to static ones in Kinesis streams this approach would require rebalancing all Confluent Connect cluster tasks far to often.
+Also it tries to manage DynamoDB Stream shards manually by using one Kafka Connect task to read from each DynamoDB Streams shard, but since DynamoDB Stream shards are dynamic compared to static ones in Kinesis streams this approach would require rebalancing all Kafka Connect cluster tasks far to often.
 
 Contrary in our implementation we opted to use Amazon Kinesis Client with DynamoDB Streams Kinesis Adapter which takes care of all shard reading and tracking tasks.
 
@@ -22,7 +22,7 @@ Contrary in our implementation we opted to use Amazon Kinesis Client with Dynamo
 
 * Java 8
 * Gradlew 5.3.1
-* Confluent Kafka Connect Framework >= 2.1.1
+* Kafka Connect Framework >= 2.1.1
 * Amazon Kinesis Client 1.9.1
 * DynamoDB Streams Kinesis Adapter 1.4.0
 
@@ -36,16 +36,16 @@ Contrary in our implementation we opted to use Amazon Kinesis Client with Dynamo
 
 * KCL(Amazon Kinesis Client) keeps metadata in separate dedicated DynamoDB table for each DynamoDB Stream it's tracking. Meaning that there will be one additional table created for each table this connector is tracking.
   
-* Current implementation supports only one Confluent task(= KCL worker) reading from one table at any given time. 
-  * This limits maximum throughput possible from one table to about **~2000 records(change events) per second**.
-  * This limitation is imposed by current plugin logic and not by the KCL library or Kafka connect framework. Running multiple tasks would require additional synchronization mechanisms for `INIT SYNC` state tracking and might be implemented in feature.
+* Current implementation supports only one Kafka Connect task(= KCL worker) reading from one table at any given time. 
+  * Due to this limitation we tested maximum throughput from one table to be **~2000 records(change events) per second**.
+  * This limitation is imposed by current plugin logic and not by the KCL library or Kafka Connect framework. Running multiple tasks would require additional synchronization mechanisms for `INIT SYNC` state tracking and might be implemented incremental feature.
   
 * Running multiple tasks for different tables on the same JVM has negative impact on overall performance of both tasks.
-  * This is so because Amazon Kinesis Client library has some global locking happening. 
+  * This is because Amazon Kinesis Client library has some global locking happening. 
   * This issue has been solved in newer KCL versions, but reading from DynamoDB Streams requires usage of DynamoDB Streams Kinesis Adapter library. And this library still depends on older Amazon Kinesis Client 1.9.1.
   * That being said you will only encounter this issue by running lots of tasks on one machine with really high load.
 
-* DynamoDB table unit capacity must be large enough to enable `INIT_SYNC` to finished in around 16 hours. Otherwise you risk `INIT_SYNC` being restarted just as soon as it's finished because DynamoDB Streams store change events only for 24 hours.
+* DynamoDB table unit capacity must be large enough to ensure `INIT_SYNC` to be finished in around 16 hours. Otherwise there is a risk `INIT_SYNC` being restarted just as soon as it's finished because DynamoDB Streams store change events only for 24 hours.
 
 * Required AWS roles:
 ```json
@@ -126,7 +126,7 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
  
 ## Releases
 
-Releases are done by creating new release(aka tag) via Github user interface. Once created Travis will pick it up, build and upload final .jar file as asset for the Github release.
+Releases are done by creating new release(aka tag) via Github user interface. Once created Travis CI will pick it up, build and upload final .jar file as asset for the Github release.
 
 ## Roadmap  (TODO: move to issues?)
 
