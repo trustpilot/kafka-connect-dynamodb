@@ -23,7 +23,7 @@ These instructions will get you running this connector on your own machine. Chec
 
 ### Running connector
 
-* First we need to make some configuration change to make connector package available to Kafka Connect:
+* First we need to perform some configuration changes to make connector package available to Kafka Connect:
 
   * Store downloaded connector jar file to a location in your filesystem. For instance: `/opt/connectors/my-dynamodb-connector`
   * Edit file `${CONFLUENT_PLATFORM_HOME}/etc/schema-registry/connect-avro-distributed.properties` and set `plugin.path=/opt/connectors`
