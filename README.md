@@ -38,7 +38,7 @@ Contrary in our implementation we opted to use Amazon Kinesis Client with Dynamo
   
 * Current implementation supports only one Kafka Connect task(= KCL worker) reading from one table at any given time. 
   * Due to this limitation we tested maximum throughput from one table to be **~2000 records(change events) per second**.
-  * This limitation is imposed by current plugin logic and not by the KCL library or Kafka Connect framework. Running multiple tasks would require additional synchronization mechanisms for `INIT SYNC` state tracking and might be implemented incremental feature.
+  * This limitation is imposed by current connector logic and not by the KCL library or Kafka Connect framework. Running multiple tasks would require additional synchronization mechanisms for `INIT SYNC` state tracking and might be implemented incremental feature.
   
 * Running multiple tasks for different tables on the same JVM has negative impact on overall performance of both tasks.
   * This is because Amazon Kinesis Client library has some global locking happening. 

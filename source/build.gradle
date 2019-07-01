@@ -1,4 +1,4 @@
-description = "Kafka Connect Source plugin that reads from DynamoDB streams"
+description = "Kafka Connect Source connector that reads from DynamoDB streams"
 
 dependencies {
     implementation 'com.google.code.gson:gson:2.8.2'
