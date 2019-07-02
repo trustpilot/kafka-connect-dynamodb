@@ -1,8 +1,8 @@
 
 # Topic messages structure
 
-* `Topic key` - contains all defined DynamoDB table keys. 
-* `Topic value` - contains full DynamoDB document serialised as DynamoDB Json string together with additional metadata.
+* `key` - contains all defined DynamoDB table keys. 
+* `value` - contains full DynamoDB document serialised as DynamoDB Json string together with additional metadata.
 
 ```json
 [
@@ -49,7 +49,7 @@
 Note that when connector detects delete event, it creates two event messages: 
  * a delete event message with `op` type `d` and empty `document` field.
  * a tombstone message contains same key as the delete message, but the entire message value is null.
-    * Kafka’s log compaction utilizes this to know that it can remove any earlier messages with the same key.
+    * Kafka’s log compaction utilizes this to know that it can delete all messages for this key.
 
 ### Tombstone message sample
 ```json

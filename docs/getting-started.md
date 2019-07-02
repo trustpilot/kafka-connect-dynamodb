@@ -1,6 +1,7 @@
 ## Getting started
 
-These instructions will get you running this connector on your own machine. Check official [Confluent documentation](https://docs.confluent.io/current/connect/userguide.html#installing-plugins) on how to install this plugin in a production cluster.
+These instructions will get you up and running this connector on your own machine. 
+> Check official [Confluent documentation](https://docs.confluent.io/current/connect/userguide.html#installing-plugins) on how to deploy to production cluster.
 
 ### Prerequisites
 
@@ -13,8 +14,8 @@ These instructions will get you running this connector on your own machine. Chec
   
 ### Setting up DynamoDB table
 
-* Connect into AWS console UI
-* Create  `test-dynamodb-connector` DynamoDB table (or use any other name you choose)
+* Login to AWS console UI
+* Create `test-dynamodb-connector` DynamoDB table (or use any other name you choose)
 * Enable DynamoDB streams with mode `new image` or `new and old image`
 * Set TAG's:
   * `stack=dev`
@@ -25,20 +26,21 @@ These instructions will get you running this connector on your own machine. Chec
 
 * First we need to perform some configuration changes to make connector package available to Kafka Connect:
 
-  * Store downloaded connector jar file to a location in your filesystem. For instance: `/opt/connectors/my-dynamodb-connector`
+  * Store downloaded connector jar file to a location in your filesystem. For instance: `/opt/connectors/kafka-dynamodb-connector`
   * Edit file `${CONFLUENT_PLATFORM_HOME}/etc/schema-registry/connect-avro-distributed.properties` and set `plugin.path=/opt/connectors`
 
 * Next start confluent and configure actual connector, by executing: 
+* 
 ```bash
 cd ${CONFLUENT_PLATFORM_HOME}/bin
 
 # Starts all the required services including Kafka and Confluent Connect
 ./confluent start
 
-# check if "com.trustpilot.connector.dynamodb.DynamoDBSourceConnector" has been loaded
+# Check if "com.trustpilot.connector.dynamodb.DynamoDBSourceConnector" has been loaded
 curl localhost:8083/connector-plugins | jq
 
-# Once everything is started, configure connector
+# Configure connector
 curl -X PUT -H "Content-Type: application/json" --data '{"connector.class":"DynamoDBSourceConnector","tasks.max":"100","name":"myDynamodbConnector"}' localhost:8083/connectors/myDynamodbConnector/config
 
 # Check connector status

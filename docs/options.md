@@ -6,7 +6,7 @@
 ```json
 
 {
-    "connector.class": "com.trustpilot.connector.dynamodb.DynamoDBSourceConnector",
+    "connector.class": "DynamoDBSourceConnector",
     "tasks.max": "100"
 }
 ```
@@ -15,7 +15,7 @@
 ## All config options (with default values)
 ```json
 {
-    "connector.class": "com.trustpilot.connector.dynamodb.DynamoDBSourceConnector",
+    "connector.class": "DynamoDBSourceConnector",
 
     "aws.region": "eu-west-1",
     "aws.access.key.id": "",
@@ -38,11 +38,11 @@
 
 `dynamodb.table.ingestion.tag.key` - only tables marked with this tag key will be ingested.
 
-`kafka.topic.prefix` - all topics create by this connector will have this prefix in their name. Following this pattern `{prefix}-{dynamodb-table-name}`
+`kafka.topic.prefix` - all topics created by this connector will have this prefix in their name. Following this pattern `{prefix}-{dynamodb-table-name}`
 
 `tasks.max` - **MUST** always exceed number of tables found for tracking. If max tasks count is lower then found tables count, no tasks will be started!
 
-`init.sync.delay.period` - time value in seconds. Defines how long `INIT_SYNC` should delay execution before starting. This is used to give time for Kafka Connect tasks to calm down after rebalance (Since multiple tasks rebalances can happen in quick succession and this would mean more duplicated data since `INIT_SYNC` process won't have time mark it's progress). 
+`init.sync.delay.period` - time interval in seconds. Defines how long `INIT_SYNC` should delay execution before starting. This is used to give time for Kafka Connect tasks to calm down after rebalance (Since multiple tasks rebalances can happen in quick succession and this would mean more duplicated data since `INIT_SYNC` process won't have time mark it's progress). 
 
  `connect.dynamodb.rediscovery.period` - time interval in milliseconds. Defines how often connector should try to find new DynamoDB tables (or detect removed ones). If changes are found tasks are automatically reconfigured.
 
