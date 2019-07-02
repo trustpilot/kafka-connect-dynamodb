@@ -156,7 +156,10 @@ public class KclWorkerImpl implements KclWorker {
                 .withFailoverTimeMillis(Constants.KCL_FAILOVER_TIME)
 
                 // logs warning if RecordProcessor task is blocked for long time periods.
-                .withLogWarningForTaskAfterMillis(60 * 1000);
+                .withLogWarningForTaskAfterMillis(60 * 1000)
+
+                // fix some random issues with https://github.com/awslabs/amazon-kinesis-client/issues/164
+                .withIgnoreUnexpectedChildShards(true);
     }
 
     /**
