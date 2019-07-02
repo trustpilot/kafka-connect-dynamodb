@@ -2,7 +2,7 @@
 # Topic messages structure
 
 * `Topic key` - contains all defined DynamoDB table keys. 
-* `Topic value` - contains ful DynamoDB document serialised as DynamoDB Json string together with additional metadata.
+* `Topic value` - contains full DynamoDB document serialised as DynamoDB Json string together with additional metadata.
 
 ```json
 [
@@ -42,7 +42,7 @@
   * `u` - existing record updated
   * `d` - existing record deleted
 
-`init_sync_start` - is set then `INIT_SYNC` starts and will retain same value not only for `INIT_SYNC` records but for all following events as well. Untill next `INIT_SYNC` events happens.
+`init_sync_start` - is set when `INIT_SYNC` starts and will retain same value not only for `INIT_SYNC` records but for all following events as well. Untill next `INIT_SYNC` events happens.
 
 ## Delete records
 
