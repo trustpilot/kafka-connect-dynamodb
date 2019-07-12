@@ -208,18 +208,19 @@ public class KclRecordProcessor implements IRecordProcessor, IShutdownNotificati
      * Called on ShutdownReason.TERMINATE
      */
     private void onTerminate(ShutdownInput shutdownInput) throws InvalidStateException, ShutdownException, InterruptedException {
-        if (!lastProcessedSeqNo.isEmpty()) {
-            ShardInfo processorRegister = shardRegister.get(this.shardId);
-
-            while (!processorRegister.getLastCommittedRecordSeqNo().equals(this.lastProcessedSeqNo)) {
-                LOGGER.info(
-                        "Shard ended. Waiting for all data table: {} from shard: {} to be committed. " +
-                                "lastCommittedRecordSeqNo: {} lastProcessedSeqNo: {}",
-                        tableName,
-                        shardId,
-                        processorRegister.getLastCommittedRecordSeqNo(),
-                        this.lastProcessedSeqNo);
-                Thread.sleep(1000);
+        if (lastProcessedSeqNo != null && !lastProcessedSeqNo.isEmpty()) {
+            ShardInfo processorRegister = shardRegister.getOrDefault(this.shardId, null);
+            if (processorRegister != null) {
+                while (!processorRegister.getLastCommittedRecordSeqNo().equals(this.lastProcessedSeqNo)) {
+                    LOGGER.info(
+                            "Shard ended. Waiting for all data table: {} from shard: {} to be committed. " +
+                                    "lastCommittedRecordSeqNo: {} lastProcessedSeqNo: {}",
+                            tableName,
+                            shardId,
+                            processorRegister.getLastCommittedRecordSeqNo(),
+                            this.lastProcessedSeqNo);
+                    Thread.sleep(500);
+                }
             }
         }
 
@@ -231,7 +232,10 @@ public class KclRecordProcessor implements IRecordProcessor, IShutdownNotificati
                 "Shard ended. All data committed. Checkpoint and proceed to next one. Table: {} ShardID: {}",
                 tableName,
                 shardId);
-        shutdownInput.getCheckpointer().checkpoint();
+        IRecordProcessorCheckpointer checkpointer = shutdownInput.getCheckpointer();
+        if (checkpointer != null) {
+            checkpointer.checkpoint();
+        }
     }
 
     /**

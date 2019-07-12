@@ -264,6 +264,27 @@ class KclRecordProcessorTests {
         verify(checkpointer, only()).checkpoint();
     }
 
+        @Test
+    void shutdownSucceddsIfCalledMultipleTimes() throws InvalidStateException, ShutdownException {
+        // Arrange
+        IRecordProcessorCheckpointer checkpointer = Mockito.mock(IRecordProcessorCheckpointer.class);
+        ProcessRecordsInput processRecordsInput = getProcessRecordsInput("SQ1").withCheckpointer(checkpointer);
+        shardRegister.get(shardId).setLastCommittedRecordSeqNo("SQ1");
+
+        // Act
+        processor.processRecords(processRecordsInput);
+        ShutdownInput shutdownInput = new ShutdownInput()
+                .withShutdownReason(ShutdownReason.TERMINATE)
+                .withCheckpointer(checkpointer);
+
+        processor.shutdown(shutdownInput);
+        processor.shutdown(shutdownInput);
+
+        // Assert
+        verify(checkpointer, times(2)).checkpoint();
+        assertFalse(shardRegister.containsKey(shardId));
+    }
+
     @Test
     void shutdownCheckpointsIfNoDataWasReceivedFromThisShard() throws InvalidStateException, ShutdownException {
         // Arrange
