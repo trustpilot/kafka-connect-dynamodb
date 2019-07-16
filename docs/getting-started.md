@@ -18,7 +18,7 @@ These instructions will get you up and running this connector on your own machin
 * Create `test-dynamodb-connector` DynamoDB table (or use any other name you choose)
 * Enable DynamoDB streams with mode `new image` or `new and old image`
 * Set TAG's:
-  * `stack=dev`
+  * `environment=dev`
   * `datalake-ingest=`
 * Put some random test data into it
 

@@ -37,7 +37,7 @@ public class DynamoDBSourceConnectorConfig extends AbstractConfig {
 	public static final String SRC_DYNAMODB_TABLE_ENV_TAG_KEY_CONFIG = "dynamodb.table.env.tag.key";
 	public static final String SRC_DYNAMODB_TABLE_ENV_TAG_KEY_DOC = "Define DynamoDB tables environment tag name. Only tables with dynamodb.table.env.tag.value value in this key will be ingested.";
 	public static final String SRC_DYNAMODB_TABLE_ENV_TAG_KEY_DISPLAY = "Environment tag key";
-	public static final String SRC_DYNAMODB_TABLE_ENV_TAG_KEY_DEFAULT = "stack";
+	public static final String SRC_DYNAMODB_TABLE_ENV_TAG_KEY_DEFAULT = "environment";
 
 	public static final String SRC_DYNAMODB_TABLE_ENV_TAG_VALUE_CONFIG = "dynamodb.table.env.tag.value";
 	public static final String SRC_DYNAMODB_TABLE_ENV_TAG_VALUE_DOC = "Define environment name which must be present in dynamodb.table.env.tag.key.";
