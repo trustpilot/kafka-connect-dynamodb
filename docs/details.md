@@ -5,7 +5,7 @@
 
 This connector can sync multiple DynamoDB tables at the same time and it does so without requiring explicit configuration for each one. On start and at regular time intervals (by default 60s) after, it queries AWS api for DynamoDB tables which match following criteria and starts Kafka Connect task for each of them:
 * ingestion TAG key set
-* stack(environment) TAG key and value set
+* environment TAG key and value set
 * DynamoDB streams enabled (in `new_image` or `new_and_old_image` mode)
 
 
@@ -40,7 +40,7 @@ Since we are using two different frameworks/libraries together there are two dif
 
 ### `DISCOVERY` state and task configuration
 
-Connector uses AWS resource group API to receive a list of DynamoDB tables which have ingestion TAG defined. Then it iterates over this list and checks if stack TAG is matched and streams are actually enabled. Connect task is started for each table which meats all requirements.
+Connector uses AWS resource group API to receive a list of DynamoDB tables which have ingestion TAG defined. Then it iterates over this list and checks if environment TAG is matched and streams are actually enabled. Connect task is started for each table which meats all requirements.
 
 `discovery` phase is executed on start and every 60 seconds(default config value) after initial start. 
 

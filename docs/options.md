@@ -21,7 +21,7 @@
     "aws.access.key.id": "",
     "aws.secret.key": "",
 
-    "dynamodb.table.env.tag.key": "stack",
+    "dynamodb.table.env.tag.key": "environment",
     "dynamodb.table.env.tag.value": "dev",
     "dynamodb.table.ingestion.tag.key": "datalake-ingest",
 
@@ -32,9 +32,9 @@
     "connect.dynamodb.rediscovery.period": "60000"
 }
 ```
-`dynamodb.table.env.tag.key` - tag key used to define environment(stack). Useful if you have `staging` and `production` under same AWS account. Or if you want to use different Kafka Connect clusters to sync different tables.
+`dynamodb.table.env.tag.key` - tag key used to define environment. Useful if you have `staging` and `production` under same AWS account. Or if you want to use different Kafka Connect clusters to sync different tables.
 
-`dynamodb.table.env.tag.value` - defines from which environment or stack to ingest tables. For e.g. 'staging' or 'production'...
+`dynamodb.table.env.tag.value` - defines from which environment to ingest tables. For e.g. 'staging' or 'production'...
 
 `dynamodb.table.ingestion.tag.key` - only tables marked with this tag key will be ingested.
 
