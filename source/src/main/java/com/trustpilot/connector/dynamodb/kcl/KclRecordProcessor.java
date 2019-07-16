@@ -211,14 +211,19 @@ public class KclRecordProcessor implements IRecordProcessor, IShutdownNotificati
         if (lastProcessedSeqNo != null && !lastProcessedSeqNo.isEmpty()) {
             ShardInfo processorRegister = shardRegister.getOrDefault(this.shardId, null);
             if (processorRegister != null) {
+                int i = 0;
                 while (!processorRegister.getLastCommittedRecordSeqNo().equals(this.lastProcessedSeqNo)) {
-                    LOGGER.info(
-                            "Shard ended. Waiting for all data table: {} from shard: {} to be committed. " +
-                                    "lastCommittedRecordSeqNo: {} lastProcessedSeqNo: {}",
-                            tableName,
-                            shardId,
-                            processorRegister.getLastCommittedRecordSeqNo(),
-                            this.lastProcessedSeqNo);
+                    if (i % 20 == 0) {
+                        LOGGER.info(
+                                "Shard ended. Waiting for all data table: {} from shard: {} to be committed. " +
+                                        "lastCommittedRecordSeqNo: {} lastProcessedSeqNo: {}",
+                                tableName,
+                                shardId,
+                                processorRegister.getLastCommittedRecordSeqNo(),
+                                this.lastProcessedSeqNo);
+                    }
+                    i += 1;
+
                     Thread.sleep(500);
                 }
             }
