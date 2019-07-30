@@ -1,12 +1,17 @@
 #######################################################################
-Apache Software License version 2.0
-Available at: http://www.apache.org/licenses/LICENSE-2.0
-For:
-    Debezium - https://github.com/debezium/debezium
-    Amazon Kinesis Client Library - https://github.com/awslabs/amazon-kinesis-client
+
+# Apache Software License version 2.0
+
+  Available at: http://www.apache.org/licenses/LICENSE-2.0
+
+Covering:
+   * Debezium - https://github.com/debezium/debezium
+   * Amazon Kinesis Client Library - https://github.com/awslabs/amazon-kinesis-client
 
 #######################################################################
+
 Apache License
+
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
 
@@ -215,10 +220,12 @@ Apache License
 
 
 #######################################################################
-Amazon Software License
+# Amazon Software License
+
 Available at: https://github.com/awslabs/dynamodb-streams-kinesis-adapter/blob/master/LICENSE.txt
-For:
-    DynamoDB Streams Kinesis Adapter - https://github.com/awslabs/dynamodb-streams-kinesis-adapter
+
+Covering:
+   * DynamoDB Streams Kinesis Adapter - https://github.com/awslabs/dynamodb-streams-kinesis-adapter
 
 #######################################################################
 Amazon Software License

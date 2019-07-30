@@ -136,6 +136,13 @@ Releases are done by creating new release(aka tag) via Github user interface. On
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
 
+Third party components and dependencies are covered by following licenses - see the [LICENSE-3rd-PARTIES](LICENSE-3rd-PARTIES.md) file for details:
+* Apache Software License version 2.0
+   * [Debezium](https://github.com/debezium/debezium)
+   * [Amazon Kinesis Client Library](https://github.com/awslabs/amazon-kinesis-client)
+* Amazon Software License
+  * [DynamoDB Streams Kinesis Adapter](https://github.com/awslabs/dynamodb-streams-kinesis-adapter)
+
 ## Acknowledgments
 
 * [Confluent](https://www.confluent.io/)
