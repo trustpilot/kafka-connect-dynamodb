@@ -3,18 +3,21 @@ package com.trustpilot.connector.dynamodb;
 import org.apache.kafka.common.config.AbstractConfig;
 import org.apache.kafka.common.config.ConfigDef;
 
+import java.util.List;
 import java.util.Map;
+
+import com.google.common.collect.Lists;
 
 public class DynamoDBSourceConnectorConfig extends AbstractConfig {
 	public static final String AWS_GROUP = "AWS";
-  	public static final String CONNECTOR_GROUP = "Connector";
+	public static final String CONNECTOR_GROUP = "Connector";
 
-  	public static final String SRC_INIT_SYNC_DELAY_CONFIG = "init.sync.delay.period";
+	public static final String SRC_INIT_SYNC_DELAY_CONFIG = "init.sync.delay.period";
 	public static final String SRC_INIT_SYNC_DELAY_DOC = "Define how long to delay INIT_SYNC start in seconds.";
 	public static final String SRC_INIT_SYNC_DELAY_DISPLAY = "INIT_SYNC delay";
 	public static final int SRC_INIT_SYNC_DELAY_DEFAULT = 60;
 
-  	public static final String AWS_REGION_CONFIG = "aws.region";
+	public static final String AWS_REGION_CONFIG = "aws.region";
 	public static final String AWS_REGION_DOC = "Define AWS region.";
 	public static final String AWS_REGION_DISPLAY = "Region";
 	public static final String AWS_REGION_DEFAULT = "eu-west-1";
@@ -43,6 +46,16 @@ public class DynamoDBSourceConnectorConfig extends AbstractConfig {
 	public static final String SRC_DYNAMODB_TABLE_ENV_TAG_VALUE_DOC = "Define environment name which must be present in dynamodb.table.env.tag.key.";
 	public static final String SRC_DYNAMODB_TABLE_ENV_TAG_VALUE_DISPLAY = "Environment";
 	public static final String SRC_DYNAMODB_TABLE_ENV_TAG_VALUE_DEFAULT = "dev";
+
+	public static final String SRC_DYNAMODB_TABLE_WHITELIST_CONFIG = "dynamodb.table.whitelist";
+	public static final String SRC_DYNAMODB_TABLE_WHITELIST_DOC = "Define whitelist of dynamodb table names";
+	public static final String SRC_DYNAMODB_TABLE_WHITELIST_DISPLAY = "Tables whitelist";
+	public static final String SRC_DYNAMODB_TABLE_WHITELIST_DEFAULT = null;
+
+	public static final String AWS_ENDPOINT_CONFIG = "aws.endpoint";
+	public static final String AWS_ENDPOINT_DOC = "Custom AWS Endpoint";
+	public static final String AWS_ENDPOINT_DISPLAY = "Endpoint";
+	public static final String AWS_ENDPOINT_DEFAULT = null;
 
 	public static final String DST_TOPIC_PREFIX_CONFIG = "kafka.topic.prefix";
 	public static final String DST_TOPIC_PREFIX_DOC = "Define Kafka topic destination prefix. End will be the name of a table.";
@@ -122,6 +135,24 @@ public class DynamoDBSourceConnectorConfig extends AbstractConfig {
 						ConfigDef.Width.MEDIUM,
 						SRC_DYNAMODB_TABLE_ENV_TAG_VALUE_DISPLAY)
 
+				.define(SRC_DYNAMODB_TABLE_WHITELIST_CONFIG,
+						ConfigDef.Type.LIST,
+						SRC_DYNAMODB_TABLE_WHITELIST_DEFAULT,
+						ConfigDef.Importance.HIGH,
+						SRC_DYNAMODB_TABLE_WHITELIST_DOC,
+						AWS_GROUP, 7,
+						ConfigDef.Width.MEDIUM,
+						SRC_DYNAMODB_TABLE_WHITELIST_DISPLAY)
+
+				.define(AWS_ENDPOINT_CONFIG,
+						ConfigDef.Type.STRING,
+						AWS_ENDPOINT_DEFAULT,
+						ConfigDef.Importance.LOW,
+						AWS_ENDPOINT_DOC,
+						AWS_GROUP, 8,
+						ConfigDef.Width.LONG,
+						AWS_ENDPOINT_DISPLAY)
+
 				.define(DST_TOPIC_PREFIX_CONFIG,
 						ConfigDef.Type.STRING,
 						DST_TOPIC_PREFIX_DEFAULT,
@@ -161,11 +192,15 @@ public class DynamoDBSourceConnectorConfig extends AbstractConfig {
 	}
 
 	public String getAwsAccessKeyId() {
-		return getString(AWS_ACCESS_KEY_ID_CONFIG);
+		return getPassword(AWS_ACCESS_KEY_ID_CONFIG) != null ? getPassword(AWS_ACCESS_KEY_ID_CONFIG).value() : null;
 	}
 
 	public String getAwsSecretKey() {
-		return getString(AWS_SECRET_KEY_CONFIG);
+		return getPassword(AWS_SECRET_KEY_CONFIG) != null ? getPassword(AWS_SECRET_KEY_CONFIG).value() : null;
+	}
+
+	public String getAwsEndpoint() {
+		return getString(AWS_ENDPOINT_CONFIG);
 	}
 
 	public String getSrcDynamoDBIngestionTagKey() {
@@ -188,5 +223,9 @@ public class DynamoDBSourceConnectorConfig extends AbstractConfig {
 
 	public int getInitSyncDelay() {
 		return (int)get(SRC_INIT_SYNC_DELAY_CONFIG);
+	}
+
+	public List<String> getWhitelistTables() {
+		return getList(SRC_DYNAMODB_TABLE_WHITELIST_CONFIG) != null ? getList(SRC_DYNAMODB_TABLE_WHITELIST_CONFIG) : Lists.newArrayList();
 	}
 }

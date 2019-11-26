@@ -5,41 +5,76 @@ import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
+import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBStreams;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBStreamsClientBuilder;
 import com.amazonaws.services.resourcegroupstaggingapi.AWSResourceGroupsTaggingAPI;
 import com.amazonaws.services.resourcegroupstaggingapi.AWSResourceGroupsTaggingAPIClientBuilder;
+
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class AwsClients {
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsClients.class);
 
-    public static AmazonDynamoDB buildDynamoDbClient(String awsRegion,
+    public static AmazonDynamoDB buildDynamoDbClient(String endpoint,
+                                                     String awsRegion,
                                                      String awsAccessKeyID,
                                                      String awsSecretKey) {
+        return buildDynamoDbClient(endpoint, awsRegion, getCredentials(awsAccessKeyID, awsSecretKey));
+    }
+
+    public static AmazonDynamoDB buildDynamoDbClient(String endpoint,
+                                                     String awsRegion,
+                                                     AWSCredentialsProvider credentialsProvider) {
         ClientConfiguration clientConfig = new ClientConfiguration();
         clientConfig.setUseThrottleRetries(true);
 
-        return AmazonDynamoDBClientBuilder.standard()
-                                          .withCredentials(getCredentials(awsAccessKeyID, awsSecretKey))
-                                          .withClientConfiguration(clientConfig)
-                                          .withRegion(awsRegion)
-                                          .build();
+        AmazonDynamoDBClientBuilder clientBuilder = AmazonDynamoDBClientBuilder.standard()
+                .withCredentials(credentialsProvider)
+                .withClientConfiguration(clientConfig);
+        if (StringUtils.isNotEmpty(endpoint)) {
+            clientBuilder.withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpoint, awsRegion));
+        } else {
+            clientBuilder.withRegion(awsRegion);
+        }
+        return clientBuilder.build();
 
     }
 
-    public static AWSResourceGroupsTaggingAPI buildAWSResourceGroupsTaggingAPIClient(String awsRegion,
+    public static AWSResourceGroupsTaggingAPI buildAWSResourceGroupsTaggingAPIClient(String endpoint,
+                                                                                     String awsRegion,
                                                                                      String awsAccessKeyID,
                                                                                      String awsSecretKey) {
         ClientConfiguration clientConfig = new ClientConfiguration();
         clientConfig.setUseThrottleRetries(true);
 
-        return AWSResourceGroupsTaggingAPIClientBuilder.standard()
-                                                       .withCredentials(getCredentials(awsAccessKeyID, awsSecretKey))
-                                                       .withClientConfiguration(clientConfig)
-                                                       .withRegion(awsRegion)
-                                                       .build();
+        AWSResourceGroupsTaggingAPIClientBuilder clientBuilder = AWSResourceGroupsTaggingAPIClientBuilder.standard()
+                .withCredentials(getCredentials(awsAccessKeyID, awsSecretKey))
+                .withClientConfiguration(clientConfig);
+
+        if (StringUtils.isNotEmpty(endpoint)) {
+            clientBuilder.withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpoint, awsRegion));
+        } else {
+            clientBuilder.withRegion(awsRegion);
+        }
+        return clientBuilder.build();
+    }
+
+    public static AmazonDynamoDBStreams buildDynamoDbStreamClient(String endpoint,
+                                                                  String awsRegion,
+                                                                  AWSCredentialsProvider credentialsProvider) {
+        AmazonDynamoDBStreamsClientBuilder clientBuilder = AmazonDynamoDBStreamsClientBuilder.standard()
+                .withCredentials(credentialsProvider);
+        if (StringUtils.isNotEmpty(endpoint)) {
+            clientBuilder.withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpoint, awsRegion));
+        } else {
+            clientBuilder.withRegion(awsRegion);
+        }
+        return clientBuilder.build();
     }
 
     public static AWSCredentialsProvider getCredentials(String awsAccessKeyID, String awsSecretKey) {

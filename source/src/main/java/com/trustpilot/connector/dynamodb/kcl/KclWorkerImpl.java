@@ -3,9 +3,7 @@ package com.trustpilot.connector.dynamodb.kcl;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBStreams;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBStreamsClientBuilder;
 import com.amazonaws.services.dynamodbv2.model.DescribeTableRequest;
 import com.amazonaws.services.dynamodbv2.streamsadapter.AmazonDynamoDBStreamsAdapterClient;
 import com.amazonaws.services.dynamodbv2.streamsadapter.StreamsWorkerFactory;
@@ -14,6 +12,8 @@ import com.amazonaws.services.kinesis.clientlibrary.lib.worker.InitialPositionIn
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.KinesisClientLibConfiguration;
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.Worker;
 import com.trustpilot.connector.dynamodb.Constants;
+import com.trustpilot.connector.dynamodb.aws.AwsClients;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,20 +45,15 @@ public class KclWorkerImpl implements KclWorker {
 
 
     @Override
-    public void start(String awsRegion, String tableName, String taskid) {
-        AmazonDynamoDB dynamoDBClient = AmazonDynamoDBClientBuilder.standard()
-                                                                   .withRegion(awsRegion)
-                                                                   .build();
-
+    public void start(String awsEndpoint, String awsRegion, String tableName, String taskid) {
+        AmazonDynamoDB dynamoDBClient = AwsClients.buildDynamoDbClient(awsEndpoint, awsRegion, awsCredentialsProvider);
 
         IRecordProcessorFactory recordProcessorFactory = new KclRecordProcessorFactory(tableName, eventsQueue,
-                                                                                       recordProcessorsRegister);
+                recordProcessorsRegister);
         KinesisClientLibConfiguration clientLibConfiguration = getClientLibConfiguration(tableName,
-                                                                                         taskid,
-                                                                                         dynamoDBClient);
-        AmazonDynamoDBStreams dynamoDBStreamsClient = AmazonDynamoDBStreamsClientBuilder.standard()
-                                                                                        .withRegion(awsRegion)
-                                                                                        .build();
+                taskid,
+                dynamoDBClient);
+        AmazonDynamoDBStreams dynamoDBStreamsClient = AwsClients.buildDynamoDbStreamClient(awsEndpoint, awsRegion, awsCredentialsProvider);
         AmazonDynamoDBStreamsAdapterClient adapterClient = new AmazonDynamoDBStreamsAdapterClient(dynamoDBStreamsClient);
 
         // If enabled, throws exception if trying to consume expired shards. But seems there is no way to catch
@@ -73,16 +68,16 @@ public class KclWorkerImpl implements KclWorker {
 
         worker = StreamsWorkerFactory
                 .createDynamoDbStreamsWorker(recordProcessorFactory,
-                                             clientLibConfiguration,
-                                             adapterClient,
-                                             dynamoDBClient,
-                                             cloudWatchClient);
+                        clientLibConfiguration,
+                        adapterClient,
+                        dynamoDBClient,
+                        cloudWatchClient);
 
 
         LOGGER.info("Creating KCL worker for Stream: {} ApplicationName: {} WorkerId: {}",
-                    clientLibConfiguration.getStreamName(),
-                    clientLibConfiguration.getApplicationName(),
-                    clientLibConfiguration.getWorkerIdentifier()
+                clientLibConfiguration.getStreamName(),
+                clientLibConfiguration.getApplicationName(),
+                clientLibConfiguration.getWorkerIdentifier()
         );
 
         thread = new Thread(worker);

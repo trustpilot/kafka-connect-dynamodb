@@ -4,6 +4,7 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.resourcegroupstaggingapi.AWSResourceGroupsTaggingAPI;
 import com.trustpilot.connector.dynamodb.aws.DynamoDBTablesProvider;
 import com.trustpilot.connector.dynamodb.aws.AwsClients;
+import com.trustpilot.connector.dynamodb.aws.StaticTablesProvider;
 import com.trustpilot.connector.dynamodb.aws.TablesProvider;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.connect.connector.ConnectorContext;
@@ -52,22 +53,8 @@ public class DynamoDBSourceConnector extends SourceConnector {
         configProperties = properties;
         DynamoDBSourceConnectorConfig config = new DynamoDBSourceConnectorConfig(configProperties);
 
-        AWSResourceGroupsTaggingAPI groupsTaggingAPIClient =
-                AwsClients.buildAWSResourceGroupsTaggingAPIClient(config.getAwsRegion(),
-                                                                  config.getAwsAccessKeyId(),
-                                                                  config.getAwsSecretKey());
-
-        AmazonDynamoDB dynamoDBClient = AwsClients.buildDynamoDbClient(config.getAwsRegion(),
-                                                                       config.getAwsAccessKeyId(),
-                                                                       config.getAwsSecretKey());
-
         if (tablesProvider == null) {
-            tablesProvider = new DynamoDBTablesProvider(
-                    groupsTaggingAPIClient,
-                    dynamoDBClient,
-                    config.getSrcDynamoDBIngestionTagKey(),
-                    config.getSrcDynamoDBEnvTagKey(),
-                    config.getSrcDynamoDBEnvTagValue());
+            tablesProvider = initTablesProvider(config);
         }
 
         startBackgroundReconfigurationTasks(this.context, config.getRediscoveryPeriod());
@@ -118,7 +105,7 @@ public class DynamoDBSourceConnector extends SourceConnector {
 
         if (consumableTables.size() > maxTasks) {
             LOGGER.error("Found {} consumable tables, but maxTasks is {}. No tasks will be configured!",
-                         consumableTables.size(), maxTasks);
+                    consumableTables.size(), maxTasks);
             return null;
         }
 
@@ -141,4 +128,29 @@ public class DynamoDBSourceConnector extends SourceConnector {
     public String version() {
         return "0.1";
     }
+
+    private TablesProvider initTablesProvider(DynamoDBSourceConnectorConfig config) {
+        if (!config.getWhitelistTables().isEmpty()) {
+            return new StaticTablesProvider(config.getWhitelistTables());
+        } else {
+            AWSResourceGroupsTaggingAPI groupsTaggingAPIClient =
+                    AwsClients.buildAWSResourceGroupsTaggingAPIClient(config.getAwsEndpoint(),
+                            config.getAwsRegion(),
+                            config.getAwsAccessKeyId(),
+                            config.getAwsSecretKey());
+
+            AmazonDynamoDB dynamoDBClient = AwsClients.buildDynamoDbClient(config.getAwsEndpoint(),
+                    config.getAwsRegion(),
+                    config.getAwsAccessKeyId(),
+                    config.getAwsSecretKey());
+
+            return new DynamoDBTablesProvider(
+                    groupsTaggingAPIClient,
+                    dynamoDBClient,
+                    config.getSrcDynamoDBIngestionTagKey(),
+                    config.getSrcDynamoDBEnvTagKey(),
+                    config.getSrcDynamoDBEnvTagValue());
+        }
+    }
+
 }

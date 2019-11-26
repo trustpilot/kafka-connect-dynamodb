@@ -111,7 +111,8 @@ public class DynamoDBSourceTask extends SourceTask {
 
         LOGGER.debug("Getting DynamoDB description for table: {}", config.getTableName());
         if (client == null) {
-            client = AwsClients.buildDynamoDbClient(config.getAwsRegion(),
+            client = AwsClients.buildDynamoDbClient(config.getAwsEndpoint(),
+                                                    config.getAwsRegion(),
                                                     config.getAwsAccessKeyId(),
                                                     config.getAwsSecretKey());
         }
@@ -138,7 +139,7 @@ public class DynamoDBSourceTask extends SourceTask {
                     eventsQueue,
                     shardRegister);
         }
-        kclWorker.start(config.getAwsRegion(), tableDesc.getTableName(), config.getTaskID());
+        kclWorker.start(config.getAwsEndpoint(), config.getAwsRegion(), tableDesc.getTableName(), config.getTaskID());
 
         shutdown = false;
     }
@@ -331,20 +332,20 @@ public class DynamoDBSourceTask extends SourceTask {
                 }
 
                 SourceRecord sourceRecord = converter.toSourceRecord(sourceInfo,
-                                                                     op,
-                                                                     attributes,
-                                                                     arrivalTimestamp.toInstant(),
-                                                                     dynamoDBRecords.getShardId(),
-                                                                     record.getSequenceNumber());
+                        op,
+                        attributes,
+                        arrivalTimestamp.toInstant(),
+                        dynamoDBRecords.getShardId(),
+                        record.getSequenceNumber());
                 result.add(sourceRecord);
 
                 if (op == Envelope.Operation.DELETE) {
                     // send a tombstone event (null value) for the old key so it can be removed from the Kafka log eventually...
                     SourceRecord tombstoneRecord = new SourceRecord(sourceRecord.sourcePartition(),
-                                                                    sourceRecord.sourceOffset(),
-                                                                    sourceRecord.topic(),
-                                                                    sourceRecord.keySchema(), sourceRecord.key(),
-                                                                    null, null);
+                            sourceRecord.sourceOffset(),
+                            sourceRecord.topic(),
+                            sourceRecord.keySchema(), sourceRecord.key(),
+                            null, null);
                     result.add(tombstoneRecord);
                 }
 
@@ -360,8 +361,8 @@ public class DynamoDBSourceTask extends SourceTask {
 
     private boolean isPreInitSyncRecord(Date arrivalTimestamp) {
         return arrivalTimestamp.toInstant()
-                               .plus(Duration.ofHours(1))
-                               .compareTo(sourceInfo.lastInitSyncStart) <= 0;
+                .plus(Duration.ofHours(1))
+                .compareTo(sourceInfo.lastInitSyncStart) <= 0;
     }
 
     private boolean recordIsInDangerZone(Date arrivalTimestamp) {
