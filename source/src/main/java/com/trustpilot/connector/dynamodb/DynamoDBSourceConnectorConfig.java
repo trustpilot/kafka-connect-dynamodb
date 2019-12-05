@@ -68,6 +68,11 @@ public class DynamoDBSourceConnectorConfig extends AbstractConfig {
 	public static final String REDISCOVERY_PERIOD_DISPLAY = "Rediscovery period";
 	public static final long REDISCOVERY_PERIOD_DEFAULT = 1 * 60 * 1000; // 1 minute
 
+	public static final String SRC_DYNAMODB_TABLE_SKIP_DATA_CONFIG = "dynamodb.table.skip.existing.data";
+	public static final String SRC_DYNAMODB_TABLE_SKIP_DATA_DOC = "Define if initial data in table should be skipped at startup";
+	public static final String SRC_DYNAMODB_TABLE_SKIP_DATA_DISPLAY = "Skip Initial Data In Table";
+	public static final String SRC_DYNAMODB_TABLE_SKIP_DATA_DEFAULT = "NONE";
+
 	static final ConfigDef config = baseConfigDef();
 
 	public DynamoDBSourceConnectorConfig(Map<String, String> props) {
@@ -180,6 +185,14 @@ public class DynamoDBSourceConnectorConfig extends AbstractConfig {
 						ConfigDef.Width.MEDIUM,
 						REDISCOVERY_PERIOD_DISPLAY)
 
+				.define(SRC_DYNAMODB_TABLE_SKIP_DATA_CONFIG,
+						ConfigDef.Type.STRING,
+						SRC_DYNAMODB_TABLE_SKIP_DATA_DEFAULT,
+						ConfigDef.Importance.LOW,
+						SRC_DYNAMODB_TABLE_SKIP_DATA_DOC,
+						CONNECTOR_GROUP, 5,
+						ConfigDef.Width.MEDIUM,
+						SRC_DYNAMODB_TABLE_SKIP_DATA_DISPLAY)
 				;
 	}
 
@@ -227,5 +240,9 @@ public class DynamoDBSourceConnectorConfig extends AbstractConfig {
 
 	public List<String> getWhitelistTables() {
 		return getList(SRC_DYNAMODB_TABLE_WHITELIST_CONFIG) != null ? getList(SRC_DYNAMODB_TABLE_WHITELIST_CONFIG) : Lists.newArrayList();
+	}
+
+	public String getSkipInitialDataInTable() {
+		return getString(SRC_DYNAMODB_TABLE_SKIP_DATA_CONFIG);
 	}
 }

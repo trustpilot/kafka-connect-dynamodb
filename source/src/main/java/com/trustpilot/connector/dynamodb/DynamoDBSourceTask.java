@@ -86,6 +86,7 @@ public class DynamoDBSourceTask extends SourceTask {
     private SourceInfo sourceInfo;
     private TableDescription tableDesc;
     private int initSyncDelay;
+    private boolean skipInitialDataInTable = false;
 
     @SuppressWarnings("unused")
     //Used by Confluent platform to initialize connector
@@ -142,6 +143,7 @@ public class DynamoDBSourceTask extends SourceTask {
         kclWorker.start(config.getAwsEndpoint(), config.getAwsRegion(), tableDesc.getTableName(), config.getTaskID());
 
         shutdown = false;
+        skipInitialDataInTable = !DynamoDBSourceConnectorConfig.SRC_DYNAMODB_TABLE_SKIP_DATA_DEFAULT.equals(config.getSkipInitialDataInTable());
     }
 
     private void setStateFromOffset() {
@@ -218,42 +220,46 @@ public class DynamoDBSourceTask extends SourceTask {
         ScanResult scanResult = tableScanner.getItems(sourceInfo.exclusiveStartKey);
 
         LinkedList<SourceRecord> result = new LinkedList<>();
-        Map<String, AttributeValue> lastRecord = null;
-        for (Map<String, AttributeValue> record : scanResult.getItems()) {
-            lastRecord = record;
-            sourceInfo.initSyncCount = sourceInfo.initSyncCount + 1;
-            result.add(converter.toSourceRecord(sourceInfo,
-                                                Envelope.Operation.READ,
-                                                record,
-                                                sourceInfo.lastInitSyncStart,
-                                                null,
-                                                null));
-        }
+        if (!skipInitialDataInTable) {
+            Map<String, AttributeValue> lastRecord = null;
+            for (Map<String, AttributeValue> record : scanResult.getItems()) {
+                lastRecord = record;
+                sourceInfo.initSyncCount = sourceInfo.initSyncCount + 1;
+                result.add(converter.toSourceRecord(sourceInfo,
+                        Envelope.Operation.READ,
+                        record,
+                        sourceInfo.lastInitSyncStart,
+                        null,
+                        null));
+            }
 
-        // Only update exclusiveStartKey and init sync state on last record.
-        // Otherwise we could loose some data in case of a crash when not all records from this batch are committed.
-        sourceInfo.exclusiveStartKey = scanResult.getLastEvaluatedKey();
-        if (sourceInfo.exclusiveStartKey == null) {
-            sourceInfo.endInitSync();
-        }
+            // Only update exclusiveStartKey and init sync state on last record.
+            // Otherwise we could loose some data in case of a crash when not all records from this batch are committed.
+            sourceInfo.exclusiveStartKey = scanResult.getLastEvaluatedKey();
+            if (sourceInfo.exclusiveStartKey == null) {
+                sourceInfo.endInitSync();
+            }
 
-        // Add last record with updated state info
-        if (!result.isEmpty()) {
-            result.removeLast();
-            result.add(converter.toSourceRecord(sourceInfo,
-                                                Envelope.Operation.READ,
-                                                lastRecord,
-                                                sourceInfo.lastInitSyncStart,
-                                                null,
-                                                null));
-        }
+            // Add last record with updated state info
+            if (!result.isEmpty()) {
+                result.removeLast();
+                result.add(converter.toSourceRecord(sourceInfo,
+                        Envelope.Operation.READ,
+                        lastRecord,
+                        sourceInfo.lastInitSyncStart,
+                        null,
+                        null));
+            }
 
 
-        if (sourceInfo.initSyncStatus == InitSyncStatus.RUNNING) {
-            LOGGER.info(
-                    "INIT_SYNC iteration returned {}. Status: {}", result.size(), sourceInfo);
+            if (sourceInfo.initSyncStatus == InitSyncStatus.RUNNING) {
+                LOGGER.info(
+                        "INIT_SYNC iteration returned {}. Status: {}", result.size(), sourceInfo);
+            } else {
+                LOGGER.info("INIT_SYNC FINISHED: {}", sourceInfo);
+            }
         } else {
-            LOGGER.info("INIT_SYNC FINISHED: {}", sourceInfo);
+            sourceInfo.endInitSync();
         }
         return result;
     }
