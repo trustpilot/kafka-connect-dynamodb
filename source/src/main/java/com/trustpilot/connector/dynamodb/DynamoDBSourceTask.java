@@ -334,7 +334,7 @@ public class DynamoDBSourceTask extends SourceTask {
                 if (dynamoDbRecord.getDynamodb().getNewImage() != null) {
                     attributes = dynamoDbRecord.getDynamodb().getNewImage();
                 } else {
-                    attributes = dynamoDbRecord.getDynamodb().getKeys();
+                    attributes = dynamoDbRecord.getDynamodb().getOldImage();
                 }
 
                 SourceRecord sourceRecord = converter.toSourceRecord(sourceInfo,
