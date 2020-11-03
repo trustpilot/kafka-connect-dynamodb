@@ -1,18 +1,19 @@
 package com.trustpilot.connector.dynamodb;
 
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import com.amazonaws.services.dynamodbv2.model.*;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBStreams;
+import com.amazonaws.services.dynamodbv2.model.AttributeValue;
+import com.amazonaws.services.dynamodbv2.model.ScanResult;
+import com.amazonaws.services.dynamodbv2.model.TableDescription;
 import com.amazonaws.services.dynamodbv2.streamsadapter.model.RecordAdapter;
 import com.amazonaws.services.kinesis.model.Record;
-import com.trustpilot.connector.dynamodb.kcl.KclWorker;
+import com.trustpilot.connector.dynamodb.aws.AwsClients;
+import com.trustpilot.connector.dynamodb.aws.DynamoDBTableScanner;
+import com.trustpilot.connector.dynamodb.aws.TableScanner;
 import com.trustpilot.connector.dynamodb.kcl.KclRecordsWrapper;
+import com.trustpilot.connector.dynamodb.kcl.KclWorker;
 import com.trustpilot.connector.dynamodb.kcl.KclWorkerImpl;
 import com.trustpilot.connector.dynamodb.kcl.ShardInfo;
-import com.trustpilot.connector.dynamodb.aws.DynamoDBTableScanner;
-import com.trustpilot.connector.dynamodb.aws.AwsClients;
-import com.trustpilot.connector.dynamodb.aws.TableScanner;
 import com.trustpilot.connector.dynamodb.utils.RecordConverter;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.apache.kafka.connect.source.SourceTask;
@@ -24,7 +25,9 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This source tasks tracks all DynamoDB table changes via DynamoDB Streams.
@@ -111,9 +114,11 @@ public class DynamoDBSourceTask extends SourceTask {
 
         LOGGER.debug("Getting DynamoDB description for table: {}", config.getTableName());
         if (client == null) {
-            client = AwsClients.buildDynamoDbClient(config.getAwsRegion(),
-                                                    config.getAwsAccessKeyId(),
-                                                    config.getAwsSecretKey());
+            client = AwsClients.buildDynamoDbClient(
+                    config.getAwsRegion(),
+                    config.getDynamoDBServiceEndpoint(),
+                    config.getAwsAccessKeyIdValue(),
+                    config.getAwsSecretKeyValue());
         }
         tableDesc = client.describeTable(config.getTableName()).getTable();
 
@@ -126,19 +131,26 @@ public class DynamoDBSourceTask extends SourceTask {
         LOGGER.debug("Initiating DynamoDB table scanner and record converter.");
         if (tableScanner == null) {
             tableScanner = new DynamoDBTableScanner(client,
-                                                    tableDesc.getTableName(),
-                                                    tableDesc.getProvisionedThroughput().getReadCapacityUnits());
+                    tableDesc.getTableName(),
+                    tableDesc.getProvisionedThroughput().getReadCapacityUnits());
         }
         converter = new RecordConverter(tableDesc, config.getDestinationTopicPrefix());
 
         LOGGER.info("Starting background KCL worker thread for table: {}", tableDesc.getTableName());
+
+        AmazonDynamoDBStreams dynamoDBStreamsClient =  AwsClients.buildDynamoDbStreamsClient(
+                config.getAwsRegion(),
+                config.getDynamoDBServiceEndpoint(),
+                config.getAwsAccessKeyIdValue(),
+                config.getAwsSecretKeyValue());
+
         if (kclWorker == null) {
             kclWorker = new KclWorkerImpl(
-                    AwsClients.getCredentials(config.getAwsAccessKeyId(), config.getAwsSecretKey()),
+                    AwsClients.getCredentials(config.getAwsAccessKeyIdValue(), config.getAwsSecretKeyValue()),
                     eventsQueue,
                     shardRegister);
         }
-        kclWorker.start(config.getAwsRegion(), tableDesc.getTableName(), config.getTaskID());
+        kclWorker.start(client, dynamoDBStreamsClient, tableDesc.getTableName(), config.getTaskID(), config.getDynamoDBServiceEndpoint(), config.getKCLTableBillingMode());
 
         shutdown = false;
     }

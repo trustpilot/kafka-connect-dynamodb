@@ -2,8 +2,9 @@ package com.trustpilot.connector.dynamodb;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.resourcegroupstaggingapi.AWSResourceGroupsTaggingAPI;
-import com.trustpilot.connector.dynamodb.aws.DynamoDBTablesProvider;
 import com.trustpilot.connector.dynamodb.aws.AwsClients;
+import com.trustpilot.connector.dynamodb.aws.ConfigTablesProvider;
+import com.trustpilot.connector.dynamodb.aws.DynamoDBTablesProvider;
 import com.trustpilot.connector.dynamodb.aws.TablesProvider;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.connect.connector.ConnectorContext;
@@ -54,20 +55,26 @@ public class DynamoDBSourceConnector extends SourceConnector {
 
         AWSResourceGroupsTaggingAPI groupsTaggingAPIClient =
                 AwsClients.buildAWSResourceGroupsTaggingAPIClient(config.getAwsRegion(),
-                                                                  config.getAwsAccessKeyId(),
-                                                                  config.getAwsSecretKey());
+                                                                  config.getResourceTaggingServiceEndpoint(),
+                                                                  config.getAwsAccessKeyIdValue(),
+                                                                  config.getAwsSecretKeyValue());
 
         AmazonDynamoDB dynamoDBClient = AwsClients.buildDynamoDbClient(config.getAwsRegion(),
-                                                                       config.getAwsAccessKeyId(),
-                                                                       config.getAwsSecretKey());
+                                                                       config.getDynamoDBServiceEndpoint(),
+                                                                       config.getAwsAccessKeyIdValue(),
+                                                                       config.getAwsSecretKeyValue());
 
         if (tablesProvider == null) {
-            tablesProvider = new DynamoDBTablesProvider(
-                    groupsTaggingAPIClient,
-                    dynamoDBClient,
-                    config.getSrcDynamoDBIngestionTagKey(),
-                    config.getSrcDynamoDBEnvTagKey(),
-                    config.getSrcDynamoDBEnvTagValue());
+            if (config.getWhitelistTables() != null) {
+                tablesProvider = new ConfigTablesProvider(dynamoDBClient, config);
+            } else {
+                tablesProvider = new DynamoDBTablesProvider(
+                        groupsTaggingAPIClient,
+                        dynamoDBClient,
+                        config.getSrcDynamoDBIngestionTagKey(),
+                        config.getSrcDynamoDBEnvTagKey(),
+                        config.getSrcDynamoDBEnvTagValue());
+            }
         }
 
         startBackgroundReconfigurationTasks(this.context, config.getRediscoveryPeriod());

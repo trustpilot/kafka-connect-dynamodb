@@ -7,7 +7,7 @@ A [Kafka Connector](http://kafka.apache.org/documentation.html#connect) which im
 ## Notable features
 * `autodiscovery` - monitors and automatically discovers DynamoDB tables to start/stop syncing from (based on AWS  TAG's)
 * `initial sync` - automatically detects and if needed performs initial(existing) data replication before tracking changes from the DynamoDB table stream
-  
+* `local debugging` - use of test containers to test full connector life-cycle  
 ## Alternatives 
 
 Prior our development we found only one existing implementation by [shikhar](https://github.com/shikhar/kafka-connect-dynamodb), but it seems to be missing major features (initial sync, handling shard changes) and is no longer supported. 
@@ -22,7 +22,7 @@ In our implementation we opted to use Amazon Kinesis Client with DynamoDB Stream
 * Gradlew 5.3.1
 * Kafka Connect Framework >= 2.1.1
 * Amazon Kinesis Client 1.9.1
-* DynamoDB Streams Kinesis Adapter 1.4.0
+* DynamoDB Streams Kinesis Adapter 1.5.2
 
 ## Documentation
 * [Getting started](docs/getting-started.md)
@@ -97,6 +97,9 @@ In our implementation we opted to use Amazon Kinesis Client with DynamoDB Stream
 #  build & run unit tests
 ./gradlew
 
+# run integration tests
+./gradlew integrationTests
+
 # build final jar
 ./gradlew shadowJar
 ```
@@ -128,7 +131,6 @@ Releases are done by creating new release(aka tag) via Github user interface. On
 
 ## Roadmap  (TODO: move to issues?)
 
-* Add Confluent stack as docker-compose.yml for easier local debugging
 * Use multithreaded DynamoDB table scan for faster `INIT SYNC`  
 
 
