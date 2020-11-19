@@ -8,7 +8,7 @@ This connector can sync multiple DynamoDB tables at the same time and it does so
 * environment TAG key and value set
 * DynamoDB streams enabled (in `new_image` or `new_and_old_image` mode)
 
-
+> Note: if `dynamodb.table.whitelist` parameter is set, then auto-discovery will not be executed and replication will be issued for explicitly defined tables.
 ### 2. "INIT_SYNC"
 
 `INIT_SYNC` is a process when all existing table data is scanned and pushed into Kafka destination topic. Usually this happens only once after source task for specific table is started for the first time. But it can be repeated in case of unexpected issues, e.g. if source connector was down for long period of time and it is possible that it has missed some of the change events from the table stream (DynamoDB streams store data for 24 hours only). 
@@ -40,7 +40,7 @@ Since we are using two different frameworks/libraries together there are two dif
 
 ### `DISCOVERY` state and task configuration
 
-Connector uses AWS resource group API to receive a list of DynamoDB tables which have ingestion TAG defined. Then it iterates over this list and checks if environment TAG is matched and streams are actually enabled. Connect task is started for each table which meats all requirements.
+If `dynamodb.table.whitelist` parameter is not defined connector uses AWS resource group API to receive a list of DynamoDB tables which have ingestion TAG defined. Then it iterates over this list and checks if environment TAG is matched and streams are actually enabled. Connect task is started for each table which meats all requirements.
 
 `discovery` phase is executed on start and every 60 seconds(default config value) after initial start. 
 

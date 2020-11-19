@@ -1,12 +1,13 @@
 package com.trustpilot.connector.dynamodb;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBStreamsClient;
 import com.amazonaws.services.dynamodbv2.model.*;
 import com.amazonaws.services.dynamodbv2.streamsadapter.model.RecordAdapter;
-import com.trustpilot.connector.dynamodb.kcl.KclWorker;
-import com.trustpilot.connector.dynamodb.kcl.KclRecordsWrapper;
-import com.trustpilot.connector.dynamodb.kcl.ShardInfo;
 import com.trustpilot.connector.dynamodb.aws.TableScanner;
+import com.trustpilot.connector.dynamodb.kcl.KclRecordsWrapper;
+import com.trustpilot.connector.dynamodb.kcl.KclWorker;
+import com.trustpilot.connector.dynamodb.kcl.ShardInfo;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.junit.jupiter.api.BeforeEach;
@@ -201,7 +202,14 @@ public class DynamoDBSourceTaskTests {
         task.start(configs);
 
         // Assert
-        verify(builder.kclWorker, times(1)).start("testRegion", tableName, "testTask1");
+        verify(builder.kclWorker, times(1)).start(
+                any(AmazonDynamoDB.class),
+                any(AmazonDynamoDBStreamsClient.class),
+                eq(tableName),
+                eq("testTask1"),
+                eq(null),
+                eq(BillingMode.PROVISIONED)
+        );
     }
 
     @Test
@@ -352,8 +360,8 @@ public class DynamoDBSourceTaskTests {
         // Assert
         assertEquals(InitSyncStatus.FINISHED, task.getSourceInfo().initSyncStatus);
         assertEquals(Instant.parse("2001-01-01T00:00:00.00Z"),
-                     task.getSourceInfo().lastInitSyncStart,
-                     "Init sync was restarted?");
+                task.getSourceInfo().lastInitSyncStart,
+                "Init sync was restarted?");
         assertEquals(Instant.parse("2001-01-01T01:00:00.00Z"), task.getSourceInfo().lastInitSyncEnd);
         assertEquals(2, task.getSourceInfo().initSyncCount);
         assertNull(task.getSourceInfo().exclusiveStartKey);
@@ -415,7 +423,7 @@ public class DynamoDBSourceTaskTests {
         assertEquals(null, ((Map<String, String>) response.get(1).sourceOffset()).get("exclusive_start_key"));
     }
 
-        @Test
+    @Test
     public void onInitSyncPollEndsInitSyncIfExclusiveStartKeyIsNullWithNoRecordsReturned() throws InterruptedException {
         // Arrange
         HashMap<String, Object> offset = new HashMap<>();
@@ -444,8 +452,8 @@ public class DynamoDBSourceTaskTests {
         // Assert
         assertEquals(InitSyncStatus.FINISHED, task.getSourceInfo().initSyncStatus);
         assertEquals(Instant.parse("2001-01-01T00:00:00.00Z"),
-                     task.getSourceInfo().lastInitSyncStart,
-                     "Init sync was restarted?");
+                task.getSourceInfo().lastInitSyncStart,
+                "Init sync was restarted?");
         assertEquals(Instant.parse("2001-01-01T01:00:00.00Z"), task.getSourceInfo().lastInitSyncEnd);
         assertNull(task.getSourceInfo().exclusiveStartKey);
 
@@ -531,14 +539,14 @@ public class DynamoDBSourceTaskTests {
 
         dynamoDBRecords.getRecords().add(
                 getRecordAdapter(Collections.singletonMap("col1", new AttributeValue().withS("key1")),
-                                 row, Instant.parse("2001-01-01T01:00:00.00Z"),
-                                 "1000000001",
-                                 "INSERT"));
+                        row, Instant.parse("2001-01-01T01:00:00.00Z"),
+                        "1000000001",
+                        "INSERT"));
         dynamoDBRecords.getRecords().add(
                 getRecordAdapter(Collections.singletonMap("col1", new AttributeValue().withS("key2")),
-                                 null, Instant.parse("2001-01-01T01:00:00.00Z"),
-                                 "1000000002",
-                                 "REMOVE"));
+                        null, Instant.parse("2001-01-01T01:00:00.00Z"),
+                        "1000000002",
+                        "REMOVE"));
 
         DynamoDBSourceTask task = new SourceTaskBuilder()
                 .withOffset(offset)
@@ -575,14 +583,14 @@ public class DynamoDBSourceTaskTests {
         row.put("col1", new AttributeValue("key1"));
 
         dynamoDBRecords.getRecords().add(getRecordAdapter(Collections.singletonMap("col1", new AttributeValue().withN("key1")),
-                                                     row, Instant.parse("2001-01-01T01:00:00.00Z"), "1000000001",
-                                                     "INSERT"));
+                row, Instant.parse("2001-01-01T01:00:00.00Z"), "1000000001",
+                "INSERT"));
         dynamoDBRecords.getRecords().add(getRecordAdapter(Collections.singletonMap("col1", new AttributeValue().withN("key1")),
-                                                     row, Instant.parse("2001-01-01T01:00:00.00Z"), "1000000002",
-                                                     "MODIFY"));
+                row, Instant.parse("2001-01-01T01:00:00.00Z"), "1000000002",
+                "MODIFY"));
         dynamoDBRecords.getRecords().add(getRecordAdapter(Collections.singletonMap("col1", new AttributeValue().withN("key1")),
-                                                     row, Instant.parse("2001-01-01T01:00:00.00Z"), "1000000003",
-                                                     "REMOVE"));
+                row, Instant.parse("2001-01-01T01:00:00.00Z"), "1000000003",
+                "REMOVE"));
 
 
         DynamoDBSourceTask task = new SourceTaskBuilder()
@@ -619,8 +627,8 @@ public class DynamoDBSourceTaskTests {
         row.put("col1", new AttributeValue("key1"));
 
         dynamoDBRecords.getRecords().add(getRecordAdapter(Collections.singletonMap("col1", new AttributeValue().withN("key1")),
-                                                     row, Instant.parse("2001-01-01T01:00:00.00Z"), "1000000003",
-                                                     "REMOVE"));
+                row, Instant.parse("2001-01-01T01:00:00.00Z"), "1000000003",
+                "REMOVE"));
 
 
         DynamoDBSourceTask task = new SourceTaskBuilder()
@@ -656,11 +664,11 @@ public class DynamoDBSourceTaskTests {
         row.put("col1", new AttributeValue("key1"));
 
         dynamoDBRecords.getRecords().add(getRecordAdapter(Collections.singletonMap("col1", new AttributeValue().withN("key1")),
-                                                     row, Instant.parse("2001-01-01T01:00:00.00Z"), "1000000001",
-                                                     "INSERT"));
+                row, Instant.parse("2001-01-01T01:00:00.00Z"), "1000000001",
+                "INSERT"));
         dynamoDBRecords.getRecords().add(getRecordAdapter(Collections.singletonMap("col1", new AttributeValue().withN("key1")),
-                                                     row, Instant.parse("2000-12-12T23:01:00.00Z"), "1000000002",
-                                                     "INSERT"));
+                row, Instant.parse("2000-12-12T23:01:00.00Z"), "1000000002",
+                "INSERT"));
 
         DynamoDBSourceTask task = new SourceTaskBuilder()
                 .withOffset(offset)
@@ -702,12 +710,12 @@ public class DynamoDBSourceTaskTests {
         row.put("col1", new AttributeValue("key1"));
 
         dynamoDBRecords.getRecords().add(getRecordAdapter(Collections.singletonMap("col1", new AttributeValue().withN("key1")),
-                                                     row, Instant.parse("2001-01-01T01:00:00.00Z"),
-                                                     "10000000000000000000001",
-                                                     "INSERT"));
+                row, Instant.parse("2001-01-01T01:00:00.00Z"),
+                "10000000000000000000001",
+                "INSERT"));
         dynamoDBRecords.getRecords().add(getRecordAdapter(Collections.singletonMap("col1", new AttributeValue().withN("key1")),
-                                                     row, Instant.parse("2001-01-01T01:00:00.00Z"),
-                                                     "10000000000000000000002"
+                row, Instant.parse("2001-01-01T01:00:00.00Z"),
+                "10000000000000000000002"
                 , "INVALID"));
 
         DynamoDBSourceTask task = new SourceTaskBuilder()
@@ -749,9 +757,9 @@ public class DynamoDBSourceTaskTests {
         row.put("col1", new AttributeValue("key1"));
 
         dynamoDBRecords.getRecords().add(getRecordAdapter(Collections.singletonMap("col1", new AttributeValue().withN("key1")),
-                                                     row, Instant.parse("2001-01-03T15:00:00.00Z"), "s1", "INSERT"));
+                row, Instant.parse("2001-01-03T15:00:00.00Z"), "s1", "INSERT"));
         dynamoDBRecords.getRecords().add(getRecordAdapter(Collections.singletonMap("col1", new AttributeValue().withN("key1")),
-                                                     row, Instant.parse("2001-01-03T00:00:00.00Z"), "s2", "INSERT"));
+                row, Instant.parse("2001-01-03T00:00:00.00Z"), "s2", "INSERT"));
 
         DynamoDBSourceTask task = new SourceTaskBuilder()
                 .withOffset(offset)

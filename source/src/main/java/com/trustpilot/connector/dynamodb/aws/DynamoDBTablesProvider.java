@@ -21,7 +21,7 @@ import java.util.*;
  * Also validates if tables have streams enabled with valid options.
  * All invalid tables are skipped.
  */
-public class DynamoDBTablesProvider implements TablesProvider {
+public class DynamoDBTablesProvider extends TablesProviderBase implements TablesProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(DynamoDBTablesProvider.class);
     private final AWSResourceGroupsTaggingAPI groupsTaggingAPI;
     private final AmazonDynamoDB client;
@@ -96,20 +96,4 @@ public class DynamoDBTablesProvider implements TablesProvider {
         return resourcesRequest;
     }
 
-    private boolean hasValidConfig(TableDescription tableDesc, String tableName) {
-        final StreamSpecification streamSpec = tableDesc.getStreamSpecification();
-        if (streamSpec == null || !streamSpec.isStreamEnabled()) {
-            LOGGER.warn("DynamoDB table `{}` does not have streams enabled", tableName);
-            return false;
-        }
-
-        final String streamViewType = streamSpec.getStreamViewType();
-        if (!streamViewType.equals(StreamViewType.NEW_IMAGE.name())
-                && !streamViewType.equals(StreamViewType.NEW_AND_OLD_IMAGES.name())) {
-            LOGGER.warn("DynamoDB stream view type for table `{}` is {}", tableName, streamViewType);
-            return false;
-        }
-
-        return true;
-    }
 }

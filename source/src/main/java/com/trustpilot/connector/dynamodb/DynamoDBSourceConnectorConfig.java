@@ -1,8 +1,11 @@
 package com.trustpilot.connector.dynamodb;
 
+import com.amazonaws.services.dynamodbv2.model.BillingMode;
 import org.apache.kafka.common.config.AbstractConfig;
 import org.apache.kafka.common.config.ConfigDef;
+import org.apache.kafka.common.config.types.Password;
 
+import java.util.List;
 import java.util.Map;
 
 public class DynamoDBSourceConnectorConfig extends AbstractConfig {
@@ -22,12 +25,12 @@ public class DynamoDBSourceConnectorConfig extends AbstractConfig {
 	public static final String AWS_ACCESS_KEY_ID_CONFIG = "aws.access.key.id";
 	public static final String AWS_ACCESS_KEY_ID_DOC = "Explicit AWS access key ID. Leave empty to utilize the default credential provider chain.";
 	public static final String AWS_ACCESS_KEY_ID_DISPLAY = "Access key id";
-	public static final Object AWS_ACCESS_KEY_ID_DEFAULT = null;
+	public static final Password AWS_ACCESS_KEY_ID_DEFAULT = null;
 
 	public static final String AWS_SECRET_KEY_CONFIG = "aws.secret.key";
 	public static final String AWS_SECRET_KEY_DOC = "Explicit AWS secret access key. Leave empty to utilize the default credential provider chain.";
 	public static final String AWS_SECRET_KEY_DISPLAY = "Secret key";
-	public static final Object AWS_SECRET_KEY_DEFAULT = null;
+	public static final Password AWS_SECRET_KEY_DEFAULT = null;
 
 	public static final String SRC_DYNAMODB_TABLE_INGESTION_TAG_KEY_CONFIG = "dynamodb.table.ingestion.tag.key";
 	public static final String SRC_DYNAMODB_TABLE_INGESTION_TAG_KEY_DOC = "Define DynamoDB table tag name. Only tables with this tag key will be ingested.";
@@ -44,6 +47,16 @@ public class DynamoDBSourceConnectorConfig extends AbstractConfig {
 	public static final String SRC_DYNAMODB_TABLE_ENV_TAG_VALUE_DISPLAY = "Environment";
 	public static final String SRC_DYNAMODB_TABLE_ENV_TAG_VALUE_DEFAULT = "dev";
 
+	public static final String SRC_DYNAMODB_TABLE_WHITELIST_CONFIG = "dynamodb.table.whitelist";
+	public static final String SRC_DYNAMODB_TABLE_WHITELIST_DOC = "Define whitelist of dynamodb table names. This overrides table auto-discovery by ingestion tag.";
+	public static final String SRC_DYNAMODB_TABLE_WHITELIST_DISPLAY = "Tables whitelist";
+	public static final String SRC_DYNAMODB_TABLE_WHITELIST_DEFAULT = null;
+
+	public static final String SRC_KCL_TABLE_BILLING_MODE_CONFIG = "kcl.table.billing.mode";
+	public static final String SRC_KCL_TABLE_BILLING_MODE_DOC = "Define billing mode for internal table created by the KCL library. Default is provisioned.";
+	public static final String SRC_KCL_TABLE_BILLING_MODE_DISPLAY = "KCL table billing mode";
+	public static final String SRC_KCL_TABLE_BILLING_MODE_DEFAULT = "PROVISIONED";
+
 	public static final String DST_TOPIC_PREFIX_CONFIG = "kafka.topic.prefix";
 	public static final String DST_TOPIC_PREFIX_DOC = "Define Kafka topic destination prefix. End will be the name of a table.";
 	public static final String DST_TOPIC_PREFIX_DISPLAY = "Topic prefix";
@@ -54,6 +67,16 @@ public class DynamoDBSourceConnectorConfig extends AbstractConfig {
 	public static final String REDISCOVERY_PERIOD_DOC = "Time period in milliseconds to rediscover stream enabled DynamoDB tables";
 	public static final String REDISCOVERY_PERIOD_DISPLAY = "Rediscovery period";
 	public static final long REDISCOVERY_PERIOD_DEFAULT = 1 * 60 * 1000; // 1 minute
+
+	public static final String AWS_RESOURCE_TAGGING_API_ENDPOINT_CONFIG = "resource.tagging.service.endpoint";
+	public static final String AWS_RESOURCE_TAGGING_API_ENDPOINT_DOC = "AWS Resource Group Tag API Endpoint. Will use default AWS if not set.";
+	public static final String AWS_RESOURCE_TAGGING_API_ENDPOINT_DISPLAY = "AWS Resource Group Tag API Endpoint";
+	public static final String AWS_RESOURCE_TAGGING_API_ENDPOINT_DEFAULT = null;
+
+	public static final String AWS_DYNAMODB_SERVICE_ENDPOINT_CONFIG = "dynamodb.service.endpoint";
+	public static final String AWS_DYNAMODB_SERVICE_ENDPOINT_DOC = "AWS DynamoDB API Endpoint. Will use default AWS if not set.";
+	public static final String AWS_DYNAMODB_SERVICE_ENDPOINT_DISPLAY = "AWS DynamoDB API Endpoint";
+	public static final String AWS_DYNAMODB_SERVICE_ENDPOINT_DEFAULT = null;
 
 	static final ConfigDef config = baseConfigDef();
 
@@ -122,6 +145,42 @@ public class DynamoDBSourceConnectorConfig extends AbstractConfig {
 						ConfigDef.Width.MEDIUM,
 						SRC_DYNAMODB_TABLE_ENV_TAG_VALUE_DISPLAY)
 
+				.define(AWS_DYNAMODB_SERVICE_ENDPOINT_CONFIG,
+						ConfigDef.Type.STRING,
+						AWS_DYNAMODB_SERVICE_ENDPOINT_DEFAULT,
+						ConfigDef.Importance.LOW,
+						AWS_DYNAMODB_SERVICE_ENDPOINT_DOC,
+						AWS_GROUP, 7,
+						ConfigDef.Width.MEDIUM,
+						AWS_DYNAMODB_SERVICE_ENDPOINT_DISPLAY)
+
+				.define(AWS_RESOURCE_TAGGING_API_ENDPOINT_CONFIG,
+						ConfigDef.Type.STRING,
+						AWS_RESOURCE_TAGGING_API_ENDPOINT_DEFAULT,
+						ConfigDef.Importance.LOW,
+						AWS_RESOURCE_TAGGING_API_ENDPOINT_DOC,
+						AWS_GROUP, 8,
+						ConfigDef.Width.MEDIUM,
+						AWS_RESOURCE_TAGGING_API_ENDPOINT_DISPLAY)
+
+				.define(SRC_DYNAMODB_TABLE_WHITELIST_CONFIG,
+						ConfigDef.Type.LIST,
+						SRC_DYNAMODB_TABLE_WHITELIST_DEFAULT,
+						ConfigDef.Importance.LOW,
+						SRC_DYNAMODB_TABLE_WHITELIST_DOC,
+						AWS_GROUP, 8,
+						ConfigDef.Width.MEDIUM,
+						SRC_DYNAMODB_TABLE_WHITELIST_DISPLAY)
+
+				.define(SRC_KCL_TABLE_BILLING_MODE_CONFIG,
+						ConfigDef.Type.STRING,
+						SRC_KCL_TABLE_BILLING_MODE_DEFAULT,
+						ConfigDef.Importance.LOW,
+						SRC_KCL_TABLE_BILLING_MODE_DOC,
+						AWS_GROUP, 9,
+						ConfigDef.Width.MEDIUM,
+						SRC_KCL_TABLE_BILLING_MODE_DISPLAY)
+
 				.define(DST_TOPIC_PREFIX_CONFIG,
 						ConfigDef.Type.STRING,
 						DST_TOPIC_PREFIX_DEFAULT,
@@ -148,8 +207,8 @@ public class DynamoDBSourceConnectorConfig extends AbstractConfig {
 						CONNECTOR_GROUP, 4,
 						ConfigDef.Width.MEDIUM,
 						REDISCOVERY_PERIOD_DISPLAY)
-
 				;
+
 	}
 
 	public static void main(String[] args) {
@@ -160,12 +219,20 @@ public class DynamoDBSourceConnectorConfig extends AbstractConfig {
 		return getString(AWS_REGION_CONFIG);
 	}
 
-	public String getAwsAccessKeyId() {
-		return getString(AWS_ACCESS_KEY_ID_CONFIG);
+	public Password getAwsAccessKeyId() {
+		return getPassword(AWS_ACCESS_KEY_ID_CONFIG);
 	}
 
-	public String getAwsSecretKey() {
-		return getString(AWS_SECRET_KEY_CONFIG);
+	public String getAwsAccessKeyIdValue() {
+		return getPassword(AWS_ACCESS_KEY_ID_CONFIG)  == null ? null : getPassword(AWS_ACCESS_KEY_ID_CONFIG).value();
+	}
+
+	public Password getAwsSecretKey() {
+		return getPassword(AWS_SECRET_KEY_CONFIG);
+	}
+
+	public String getAwsSecretKeyValue() {
+		return getPassword(AWS_SECRET_KEY_CONFIG)  == null ? null : getPassword(AWS_SECRET_KEY_CONFIG).value();
 	}
 
 	public String getSrcDynamoDBIngestionTagKey() {
@@ -188,5 +255,21 @@ public class DynamoDBSourceConnectorConfig extends AbstractConfig {
 
 	public int getInitSyncDelay() {
 		return (int)get(SRC_INIT_SYNC_DELAY_CONFIG);
+	}
+
+	public String getDynamoDBServiceEndpoint() {
+		return getString(AWS_DYNAMODB_SERVICE_ENDPOINT_CONFIG);
+	}
+
+	public String getResourceTaggingServiceEndpoint() {
+		return getString(AWS_RESOURCE_TAGGING_API_ENDPOINT_CONFIG);
+	}
+
+	public List<String> getWhitelistTables() {
+		return getList(SRC_DYNAMODB_TABLE_WHITELIST_CONFIG) != null ? getList(SRC_DYNAMODB_TABLE_WHITELIST_CONFIG) : null;
+	}
+
+	public BillingMode getKCLTableBillingMode() {
+		return BillingMode.fromValue(getString(SRC_KCL_TABLE_BILLING_MODE_CONFIG));
 	}
 }

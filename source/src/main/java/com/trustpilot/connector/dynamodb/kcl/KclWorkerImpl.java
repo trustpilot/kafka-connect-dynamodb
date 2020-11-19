@@ -3,9 +3,8 @@ package com.trustpilot.connector.dynamodb.kcl;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBStreams;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBStreamsClientBuilder;
+import com.amazonaws.services.dynamodbv2.model.BillingMode;
 import com.amazonaws.services.dynamodbv2.model.DescribeTableRequest;
 import com.amazonaws.services.dynamodbv2.streamsadapter.AmazonDynamoDBStreamsAdapterClient;
 import com.amazonaws.services.dynamodbv2.streamsadapter.StreamsWorkerFactory;
@@ -45,20 +44,19 @@ public class KclWorkerImpl implements KclWorker {
 
 
     @Override
-    public void start(String awsRegion, String tableName, String taskid) {
-        AmazonDynamoDB dynamoDBClient = AmazonDynamoDBClientBuilder.standard()
-                                                                   .withRegion(awsRegion)
-                                                                   .build();
-
-
+    public void start(AmazonDynamoDB dynamoDBClient,
+                      AmazonDynamoDBStreams dynamoDBStreamsClient,
+                      String tableName,
+                      String taskid,
+                      String endpoint,
+                      BillingMode kclTableBillingMode) {
         IRecordProcessorFactory recordProcessorFactory = new KclRecordProcessorFactory(tableName, eventsQueue,
-                                                                                       recordProcessorsRegister);
+                recordProcessorsRegister);
+
         KinesisClientLibConfiguration clientLibConfiguration = getClientLibConfiguration(tableName,
-                                                                                         taskid,
-                                                                                         dynamoDBClient);
-        AmazonDynamoDBStreams dynamoDBStreamsClient = AmazonDynamoDBStreamsClientBuilder.standard()
-                                                                                        .withRegion(awsRegion)
-                                                                                        .build();
+                taskid,
+                dynamoDBClient, endpoint, kclTableBillingMode);
+
         AmazonDynamoDBStreamsAdapterClient adapterClient = new AmazonDynamoDBStreamsAdapterClient(dynamoDBStreamsClient);
 
         // If enabled, throws exception if trying to consume expired shards. But seems there is no way to catch
@@ -73,16 +71,16 @@ public class KclWorkerImpl implements KclWorker {
 
         worker = StreamsWorkerFactory
                 .createDynamoDbStreamsWorker(recordProcessorFactory,
-                                             clientLibConfiguration,
-                                             adapterClient,
-                                             dynamoDBClient,
-                                             cloudWatchClient);
+                        clientLibConfiguration,
+                        adapterClient,
+                        dynamoDBClient,
+                        cloudWatchClient);
 
 
         LOGGER.info("Creating KCL worker for Stream: {} ApplicationName: {} WorkerId: {}",
-                    clientLibConfiguration.getStreamName(),
-                    clientLibConfiguration.getApplicationName(),
-                    clientLibConfiguration.getWorkerIdentifier()
+                clientLibConfiguration.getStreamName(),
+                clientLibConfiguration.getApplicationName(),
+                clientLibConfiguration.getWorkerIdentifier()
         );
 
         thread = new Thread(worker);
@@ -123,7 +121,9 @@ public class KclWorkerImpl implements KclWorker {
 
     KinesisClientLibConfiguration getClientLibConfiguration(String tableName,
                                                             String taskid,
-                                                            AmazonDynamoDB dynamoDBClient) {
+                                                            AmazonDynamoDB dynamoDBClient,
+                                                            String endpoint,
+                                                            BillingMode kclTableBillingMode) {
 
         String streamArn = dynamoDBClient.describeTable(
                 new DescribeTableRequest()
@@ -159,7 +159,13 @@ public class KclWorkerImpl implements KclWorker {
                 .withLogWarningForTaskAfterMillis(60 * 1000)
 
                 // fix some random issues with https://github.com/awslabs/amazon-kinesis-client/issues/164
-                .withIgnoreUnexpectedChildShards(true);
+                .withIgnoreUnexpectedChildShards(true)
+
+                // custom streams API endpoint
+                .withDynamoDBEndpoint(endpoint)
+
+                // custom table billing mode
+                .withBillingMode(kclTableBillingMode);
     }
 
     /**
