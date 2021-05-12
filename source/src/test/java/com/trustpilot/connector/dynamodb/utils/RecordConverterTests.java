@@ -52,6 +52,18 @@ public class RecordConverterTests {
         return attributes;
     }
 
+    private Map<String, AttributeValue> getAttributesWithInvalidAvroCharacters() {
+        Map<String, AttributeValue> attributes = new HashMap<>();
+        attributes.put("test-1234", new AttributeValue().withS("testKV1Value"));
+        attributes.put("1-starts-with-number", new AttributeValue().withS("2"));
+        attributes.put("_starts_with_underscore", new AttributeValue().withN("1"));
+        attributes.put("test!@£$%^", new AttributeValue().withS("testStringValue"));
+
+        return attributes;
+    }
+
+
+
     private SourceInfo getSourceInfo(String table) {
         SourceInfo sourceInfo = new SourceInfo(table, Clock.fixed(Instant.parse("2001-01-02T00:00:00Z"), ZoneId.of("UTC")));
         sourceInfo.initSyncStatus = InitSyncStatus.RUNNING;
@@ -189,6 +201,81 @@ public class RecordConverterTests {
         // Assert
         assertEquals("{\"testKV1\":{\"s\":\"testKV1Value\"},\"testKV2\":{\"s\":\"2\"},\"testV2\":{\"s\":\"testStringValue\"},\"testV1\":{\"n\":\"1\"}}",
                      ((Struct) record.value()).getString("document"));
+    }
+
+    @Test
+    public void singleItemKeyIsAddedToRecordWhenKeyContainsInvalidCharacters() throws Exception {
+        // Arrange
+        List<KeySchemaElement> keySchema = new LinkedList<>();
+        keySchema.add(new KeySchemaElement().withKeyType("S").withAttributeName("test-1234"));
+
+        RecordConverter converter = new RecordConverter(getTableDescription(keySchema), "TestTopicPrefix-");
+
+        // Act
+        SourceRecord record = converter.toSourceRecord(
+                getSourceInfo(table),
+                Envelope.Operation.forCode("r"),
+                getAttributesWithInvalidAvroCharacters(),
+                Instant.parse("2001-01-02T00:00:00.00Z"),
+                "testShardID1",
+                "testSequenceNumberID1"
+        );
+
+        // Assert
+        assertEquals("test_1234", record.keySchema().fields().get(0).name());
+        assertEquals(SchemaBuilder.string().build(), record.keySchema().fields().get(0).schema());
+        assertEquals("testKV1Value", ((Struct) record.key()).getString("test_1234"));
+    }
+
+    @Test
+    public void multiItemKeyIsAddedToRecordWhenKeyContainsInvalidCharacters() throws Exception {
+        // Arrange
+        List<KeySchemaElement> keySchema = new LinkedList<>();
+        keySchema.add(new KeySchemaElement().withKeyType("S").withAttributeName("test-1234"));
+        keySchema.add(new KeySchemaElement().withKeyType("N").withAttributeName("1-starts-with-number"));
+
+        RecordConverter converter = new RecordConverter(getTableDescription(keySchema), "TestTopicPrefix-");
+
+        // Act
+        SourceRecord record = converter.toSourceRecord(
+                getSourceInfo(table),
+                Envelope.Operation.forCode("r"),
+                getAttributesWithInvalidAvroCharacters(),
+                Instant.parse("2001-01-02T00:00:00.00Z"),
+                "testShardID1",
+                "testSequenceNumberID1"
+        );
+
+        // Assert
+        assertEquals("test_1234", record.keySchema().fields().get(0).name());
+        assertEquals(SchemaBuilder.string().build(), record.keySchema().fields().get(0).schema());
+        assertEquals("testKV1Value", ((Struct) record.key()).getString("test_1234"));
+
+        assertEquals("__starts_with_number", record.keySchema().fields().get(1).name());
+        assertEquals(SchemaBuilder.string().build(), record.keySchema().fields().get(1).schema());
+        assertEquals("2", ((Struct) record.key()).getString("__starts_with_number"));
+    }
+
+    @Test
+    public void recordAttributesAreAddedToValueDataWhenAttributesContainsInvalidCharacters() throws Exception {
+        // Arrange
+        RecordConverter converter = new RecordConverter(getTableDescription(null), "TestTopicPrefix-");
+
+        // Act
+        SourceRecord record = converter.toSourceRecord(
+                getSourceInfo(table),
+                Envelope.Operation.forCode("r"),
+                getAttributesWithInvalidAvroCharacters(),
+                Instant.parse("2001-01-02T00:00:00.00Z"),
+                "testShardID1",
+                "testSequenceNumberID1"
+        );
+
+        String expected = "{\"test_1234\":{\"s\":\"testKV1Value\"},\"_starts_with_underscore\":{\"n\":\"1\"},\"__starts_with_number\":{\"s\":\"2\"},\"test______\":{\"s\":\"testStringValue\"}}";
+
+        // Assert
+        assertEquals(expected,
+                ((Struct) record.value()).getString("document"));
     }
 
     @Test
