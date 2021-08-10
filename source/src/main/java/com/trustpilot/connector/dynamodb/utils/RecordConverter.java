@@ -19,6 +19,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
 
@@ -51,6 +52,7 @@ public class RecordConverter {
                                    .name(SchemaNameAdjuster.DEFAULT.adjust( "com.trustpilot.connector.dynamodb.envelope"))
                                    .field(Envelope.FieldName.VERSION, Schema.STRING_SCHEMA)
                                    .field(Envelope.FieldName.DOCUMENT, DynamoDbJson.schema())
+                                   .field(Envelope.FieldName.OLD_DOCUMENT, DynamoDbJson.schema())
                                    .field(Envelope.FieldName.SOURCE, SourceInfo.structSchema())
                                    .field(Envelope.FieldName.OPERATION, Schema.STRING_SCHEMA)
                                    .field(Envelope.FieldName.TIMESTAMP, Schema.INT64_SCHEMA)
@@ -61,6 +63,7 @@ public class RecordConverter {
             SourceInfo sourceInfo,
             Envelope.Operation op,
             Map<String, AttributeValue> attributes,
+            Map<String, AttributeValue> oldAttributes,
             Instant arrivalTimestamp,
             String shardId,
             String sequenceNumber) throws Exception {
@@ -73,6 +76,7 @@ public class RecordConverter {
                         (u, v) -> u,
                         LinkedHashMap::new
                 ));
+
 
         // Leveraging offsets to store shard and sequence number with each item pushed to Kafka.
         // This info will only be used to update `shardRegister` and won't be used to reset state after restart
@@ -105,6 +109,17 @@ public class RecordConverter {
                 .put(Envelope.FieldName.SOURCE, SourceInfo.toStruct(sourceInfo))
                 .put(Envelope.FieldName.OPERATION, op.code())
                 .put(Envelope.FieldName.TIMESTAMP, arrivalTimestamp.toEpochMilli());
+
+        if (oldAttributes != null) {
+            Map<String, AttributeValue> sanitisedOldAttributes = oldAttributes.entrySet().stream()
+                .collect(Collectors.toMap(
+                        e -> this.sanitiseAttributeName(e.getKey()),
+                        Map.Entry::getValue,
+                        (u, v) -> u,
+                        LinkedHashMap::new
+                ));
+            valueData = valueData.put(Envelope.FieldName.OLD_DOCUMENT, objectMapper.writeValueAsString(sanitisedOldAttributes));
+        }
 
         return new SourceRecord(
                 Collections.singletonMap("table_name", sourceInfo.tableName),
