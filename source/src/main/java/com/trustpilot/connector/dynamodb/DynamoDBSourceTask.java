@@ -236,7 +236,6 @@ public class DynamoDBSourceTask extends SourceTask {
             result.add(converter.toSourceRecord(sourceInfo,
                                                 Envelope.Operation.READ,
                                                 record,
-                                                null,
                                                 sourceInfo.lastInitSyncStart,
                                                 null,
                                                 null));
@@ -255,7 +254,6 @@ public class DynamoDBSourceTask extends SourceTask {
             result.add(converter.toSourceRecord(sourceInfo,
                                                 Envelope.Operation.READ,
                                                 lastRecord,
-                                                null,
                                                 sourceInfo.lastInitSyncStart,
                                                 null,
                                                 null));
@@ -336,6 +334,7 @@ public class DynamoDBSourceTask extends SourceTask {
                         ((RecordAdapter) record).getInternalObject();
 
                 Envelope.Operation op = getOperation(dynamoDbRecord.getEventName());
+                String eventId = dynamoDbRecord.getEventID();
 
                 Map<String, AttributeValue> attributes;
                 if (dynamoDbRecord.getDynamodb().getNewImage() != null) {
@@ -346,6 +345,7 @@ public class DynamoDBSourceTask extends SourceTask {
 
                 SourceRecord sourceRecord = converter.toSourceRecord(sourceInfo,
                                                                      op,
+                                                                     eventId,
                                                                      attributes,
                                                                      dynamoDbRecord.getDynamodb().getOldImage(),
                                                                      arrivalTimestamp.toInstant(),

@@ -82,7 +82,6 @@ public class RecordConverterTests {
                 getSourceInfo(table),
                 Envelope.Operation.forCode("r"),
                 getAttributes(),
-                null,
                 Instant.parse("2001-01-02T00:00:00.00Z"),
                 "testShardID1",
                 "testSequenceNumberID1"
@@ -102,7 +101,6 @@ public class RecordConverterTests {
                 getSourceInfo(table),
                 Envelope.Operation.forCode("r"),
                 getAttributes(),
-                null,
                 Instant.parse("2001-01-02T00:00:00.00Z"),
                 "testShardID1",
                 "testSequenceNumberID1"
@@ -122,7 +120,6 @@ public class RecordConverterTests {
                 getSourceInfo(table),
                 Envelope.Operation.forCode("r"),
                 getAttributes(),
-                null,
                 Instant.parse("2001-01-02T00:00:00.00Z"),
                 "testShardID1",
                 "testSequenceNumberID1"
@@ -146,7 +143,6 @@ public class RecordConverterTests {
                 getSourceInfo(table),
                 Envelope.Operation.forCode("r"),
                 getAttributes(),
-                null,
                 Instant.parse("2001-01-02T00:00:00.00Z"),
                 "testShardID1",
                 "testSequenceNumberID1"
@@ -172,7 +168,6 @@ public class RecordConverterTests {
                 getSourceInfo(table),
                 Envelope.Operation.forCode("r"),
                 getAttributes(),
-                null,
                 Instant.parse("2001-01-02T00:00:00.00Z"),
                 "testShardID1",
                 "testSequenceNumberID1"
@@ -198,7 +193,6 @@ public class RecordConverterTests {
                 getSourceInfo(table),
                 Envelope.Operation.forCode("r"),
                 getAttributes(),
-                null,
                 Instant.parse("2001-01-02T00:00:00.00Z"),
                 "testShardID1",
                 "testSequenceNumberID1"
@@ -222,7 +216,6 @@ public class RecordConverterTests {
                 getSourceInfo(table),
                 Envelope.Operation.forCode("r"),
                 getAttributesWithInvalidAvroCharacters(),
-                null,
                 Instant.parse("2001-01-02T00:00:00.00Z"),
                 "testShardID1",
                 "testSequenceNumberID1"
@@ -248,7 +241,6 @@ public class RecordConverterTests {
                 getSourceInfo(table),
                 Envelope.Operation.forCode("r"),
                 getAttributesWithInvalidAvroCharacters(),
-                null,
                 Instant.parse("2001-01-02T00:00:00.00Z"),
                 "testShardID1",
                 "testSequenceNumberID1"
@@ -274,7 +266,6 @@ public class RecordConverterTests {
                 getSourceInfo(table),
                 Envelope.Operation.forCode("r"),
                 getAttributesWithInvalidAvroCharacters(),
-                null,
                 Instant.parse("2001-01-02T00:00:00.00Z"),
                 "testShardID1",
                 "testSequenceNumberID1"
@@ -297,7 +288,6 @@ public class RecordConverterTests {
                 getSourceInfo(table),
                 Envelope.Operation.forCode("r"),
                 getAttributes(),
-                null,
                 Instant.parse("2001-01-02T00:00:00.00Z"),
                 "testShardID1",
                 "testSequenceNumberID1"
@@ -320,7 +310,6 @@ public class RecordConverterTests {
                 getSourceInfo(table),
                 Envelope.Operation.forCode("r"),
                 getAttributes(),
-                null,
                 Instant.parse("2001-01-02T00:00:00.00Z"),
                 "testShardID1",
                 "testSequenceNumberID1"
@@ -340,7 +329,6 @@ public class RecordConverterTests {
                 getSourceInfo(table),
                 Envelope.Operation.forCode("r"),
                 getAttributes(),
-                null,
                 Instant.parse("2001-01-02T00:00:00.00Z"),
                 "testShardID1",
                 "testSequenceNumberID1"

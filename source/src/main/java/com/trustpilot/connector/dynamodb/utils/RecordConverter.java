@@ -39,7 +39,7 @@ public class RecordConverter {
 
     private final TableDescription tableDesc;
     private final String topic_name;
-    private Schema keySchema;
+    private final Schema keySchema;
     private final Schema valueSchema;
 
     private List<String> keys;
@@ -48,20 +48,36 @@ public class RecordConverter {
         this.tableDesc = tableDesc;
         this.topic_name = topicNamePrefix + tableDesc.getTableName();
 
-        valueSchema = SchemaBuilder.struct()
+        this.keys = tableDesc.getKeySchema().stream().map(this::sanitiseAttributeName).collect(toList());
+        this.keySchema = getKeySchema(keys);
+        this.valueSchema = SchemaBuilder.struct()
                                    .name(SchemaNameAdjuster.DEFAULT.adjust( "com.trustpilot.connector.dynamodb.envelope"))
                                    .field(Envelope.FieldName.VERSION, Schema.STRING_SCHEMA)
+                                   .field(Envelope.FieldName.EVENT_ID, Schema.OPTIONAL_STRING_SCHEMA)
                                    .field(Envelope.FieldName.DOCUMENT, DynamoDbJson.schema())
-                                   .field(Envelope.FieldName.OLD_DOCUMENT, DynamoDbJson.schema())
+                                   .field(Envelope.FieldName.OLD_DOCUMENT, DynamoDbJson.optionalSchema())
                                    .field(Envelope.FieldName.SOURCE, SourceInfo.structSchema())
                                    .field(Envelope.FieldName.OPERATION, Schema.STRING_SCHEMA)
                                    .field(Envelope.FieldName.TIMESTAMP, Schema.INT64_SCHEMA)
+                                   .field(Envelope.FieldName.KEY, this.keySchema)
                                    .build();
     }
 
     public SourceRecord toSourceRecord(
             SourceInfo sourceInfo,
             Envelope.Operation op,
+            Map<String, AttributeValue> attributes,
+            Instant arrivalTimestamp,
+            String shardId,
+            String sequenceNumber) throws Exception{
+
+            return toSourceRecord(sourceInfo, op, null, attributes, null, arrivalTimestamp, shardId, sequenceNumber);
+    }
+
+    public SourceRecord toSourceRecord(
+            SourceInfo sourceInfo,
+            Envelope.Operation op,
+            String eventId,
             Map<String, AttributeValue> attributes,
             Map<String, AttributeValue> oldAttributes,
             Instant arrivalTimestamp,
@@ -84,12 +100,6 @@ public class RecordConverter {
         offsets.put(SHARD_ID, shardId);
         offsets.put(SHARD_SEQUENCE_NO, sequenceNumber);
 
-        // DynamoDB keys can be changed only by recreating the table
-        if (keySchema == null) {
-            keys = tableDesc.getKeySchema().stream().map(this::sanitiseAttributeName).collect(toList());
-            keySchema = getKeySchema(keys);
-        }
-
         Struct keyData = new Struct(getKeySchema(keys));
         for (String key : keys) {
             AttributeValue attributeValue = sanitisedAttributes.get(key);
@@ -108,8 +118,13 @@ public class RecordConverter {
                 .put(Envelope.FieldName.DOCUMENT, objectMapper.writeValueAsString(sanitisedAttributes))
                 .put(Envelope.FieldName.SOURCE, SourceInfo.toStruct(sourceInfo))
                 .put(Envelope.FieldName.OPERATION, op.code())
-                .put(Envelope.FieldName.TIMESTAMP, arrivalTimestamp.toEpochMilli());
+                .put(Envelope.FieldName.TIMESTAMP, arrivalTimestamp.toEpochMilli())
+                .put(Envelope.FieldName.KEY, keyData);
 
+
+        if (eventId != null) {
+            valueData = valueData.put(Envelope.FieldName.EVENT_ID, eventId);
+        }
         if (oldAttributes != null) {
             Map<String, AttributeValue> sanitisedOldAttributes = oldAttributes.entrySet().stream()
                 .collect(Collectors.toMap(
