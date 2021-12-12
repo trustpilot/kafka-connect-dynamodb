@@ -5,6 +5,7 @@ import com.amazonaws.services.dynamodbv2.model.KeySchemaElement;
 import com.amazonaws.services.dynamodbv2.model.TableDescription;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Strings;
 import com.trustpilot.connector.dynamodb.Envelope;
 import com.trustpilot.connector.dynamodb.SourceInfo;
 import org.apache.kafka.connect.data.Schema;
@@ -14,8 +15,10 @@ import org.apache.kafka.connect.source.SourceRecord;
 
 import java.time.Instant;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -62,6 +65,15 @@ public class RecordConverter {
             String shardId,
             String sequenceNumber) throws Exception {
 
+        // Sanitise the incoming attributes to remove any invalid Avro characters
+        final Map<String, AttributeValue> sanitisedAttributes = attributes.entrySet().stream()
+                .collect(Collectors.toMap(
+                        e -> this.sanitiseAttributeName(e.getKey()),
+                        Map.Entry::getValue,
+                        (u, v) -> u,
+                        LinkedHashMap::new
+                ));
+
         // Leveraging offsets to store shard and sequence number with each item pushed to Kafka.
         // This info will only be used to update `shardRegister` and won't be used to reset state after restart
         Map<String, Object> offsets = SourceInfo.toOffset(sourceInfo);
@@ -70,13 +82,13 @@ public class RecordConverter {
 
         // DynamoDB keys can be changed only by recreating the table
         if (keySchema == null) {
-            keys = tableDesc.getKeySchema().stream().map(KeySchemaElement::getAttributeName).collect(toList());
+            keys = tableDesc.getKeySchema().stream().map(this::sanitiseAttributeName).collect(toList());
             keySchema = getKeySchema(keys);
         }
 
         Struct keyData = new Struct(getKeySchema(keys));
         for (String key : keys) {
-            AttributeValue attributeValue = attributes.get(key);
+            AttributeValue attributeValue = sanitisedAttributes.get(key);
             if (attributeValue.getS() != null) {
                 keyData.put(key, attributeValue.getS());
                 continue;
@@ -89,7 +101,7 @@ public class RecordConverter {
 
         Struct valueData = new Struct(valueSchema)
                 .put(Envelope.FieldName.VERSION, sourceInfo.version)
-                .put(Envelope.FieldName.DOCUMENT, objectMapper.writeValueAsString(attributes))
+                .put(Envelope.FieldName.DOCUMENT, objectMapper.writeValueAsString(sanitisedAttributes))
                 .put(Envelope.FieldName.SOURCE, SourceInfo.toStruct(sourceInfo))
                 .put(Envelope.FieldName.OPERATION, op.code())
                 .put(Envelope.FieldName.TIMESTAMP, arrivalTimestamp.toEpochMilli());
@@ -113,4 +125,17 @@ public class RecordConverter {
         return keySchemaBuilder.build();
     }
 
+    private String sanitiseAttributeName(KeySchemaElement element) {
+        return this.sanitiseAttributeName(element.getAttributeName());
+    }
+
+    private String sanitiseAttributeName(final String attributeName) {
+        final String sanitisedAttributeName = attributeName.replaceAll("^[^a-zA-Z_]|(?<!^)[^a-zA-Z0-9_]", "");
+
+        if (Strings.isNullOrEmpty(sanitisedAttributeName)) {
+            throw new IllegalStateException(String.format("The field name %s couldn't be sanitised correctly", attributeName));
+        }
+
+        return sanitisedAttributeName;
+    }
 }
