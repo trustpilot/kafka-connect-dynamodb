@@ -222,9 +222,9 @@ public class RecordConverterTests {
         );
 
         // Assert
-        assertEquals("test1234", record.keySchema().fields().get(0).name());
+        assertEquals("test_1234", record.keySchema().fields().get(0).name());
         assertEquals(SchemaBuilder.string().build(), record.keySchema().fields().get(0).schema());
-        assertEquals("testKV1Value", ((Struct) record.key()).getString("test1234"));
+        assertEquals("testKV1Value", ((Struct) record.key()).getString("test_1234"));
     }
 
     @Test
@@ -247,13 +247,13 @@ public class RecordConverterTests {
         );
 
         // Assert
-        assertEquals("test1234", record.keySchema().fields().get(0).name());
+        assertEquals("test_1234", record.keySchema().fields().get(0).name());
         assertEquals(SchemaBuilder.string().build(), record.keySchema().fields().get(0).schema());
-        assertEquals("testKV1Value", ((Struct) record.key()).getString("test1234"));
+        assertEquals("testKV1Value", ((Struct) record.key()).getString("test_1234"));
 
-        assertEquals("startswithnumber", record.keySchema().fields().get(1).name());
+        assertEquals("__starts_with_number", record.keySchema().fields().get(1).name());
         assertEquals(SchemaBuilder.string().build(), record.keySchema().fields().get(1).schema());
-        assertEquals("2", ((Struct) record.key()).getString("startswithnumber"));
+        assertEquals("2", ((Struct) record.key()).getString("__starts_with_number"));
     }
 
     @Test
@@ -271,7 +271,7 @@ public class RecordConverterTests {
                 "testSequenceNumberID1"
         );
 
-        String expected = "{\"test1234\":{\"s\":\"testKV1Value\"},\"_starts_with_underscore\":{\"n\":\"1\"},\"startswithnumber\":{\"s\":\"2\"},\"test\":{\"s\":\"testStringValue\"}}";
+        String expected = "{\"test_1234\":{\"s\":\"testKV1Value\"},\"_starts_with_underscore\":{\"n\":\"1\"},\"__starts_with_number\":{\"s\":\"2\"},\"test______\":{\"s\":\"testStringValue\"}}";
 
         // Assert
         assertEquals(expected,
