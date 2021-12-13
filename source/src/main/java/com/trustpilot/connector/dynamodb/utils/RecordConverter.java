@@ -5,7 +5,6 @@ import com.amazonaws.services.dynamodbv2.model.KeySchemaElement;
 import com.amazonaws.services.dynamodbv2.model.TableDescription;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Strings;
 import com.trustpilot.connector.dynamodb.Envelope;
 import com.trustpilot.connector.dynamodb.SourceInfo;
 import org.apache.kafka.connect.data.Schema;
@@ -130,12 +129,6 @@ public class RecordConverter {
     }
 
     private String sanitiseAttributeName(final String attributeName) {
-        final String sanitisedAttributeName = attributeName.replaceAll("^[^a-zA-Z_]|(?<!^)[^a-zA-Z0-9_]", "");
-
-        if (Strings.isNullOrEmpty(sanitisedAttributeName)) {
-            throw new IllegalStateException(String.format("The field name %s couldn't be sanitised correctly", attributeName));
-        }
-
-        return sanitisedAttributeName;
+        return attributeName.replaceAll("^[^a-zA-Z_]|(?<!^)[^a-zA-Z0-9_]", "_");
     }
 }
