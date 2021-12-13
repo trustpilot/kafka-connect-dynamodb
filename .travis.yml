@@ -10,3 +10,11 @@ cache:
 script:
   - ./gradlew build --build-cache -PwarningsAsErrors=true
   - ./gradlew shadowJar
+
+deploy:
+  provider: releases
+  api_key: "$GITHUB_TOKEN"
+  file: "build/libs/kafka-connect-dynamodb-${TRAVIS_TAG}.jar"
+  skip_cleanup: true
+  on:
+    tags: true
