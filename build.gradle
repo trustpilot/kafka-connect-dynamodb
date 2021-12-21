@@ -59,9 +59,9 @@ allprojects {
         testCompile "com.google.code.gson:gson:2.8.6"
 
         testCompile group: 'org.mockito', name: 'mockito-junit-jupiter', version: '2.26.0'
-        compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.15.0'
-        compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.15.0'
-        compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.15.0'
+        compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.17.0'
+        compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.17.0'
+        compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.17.0'
     }
 
     test {
