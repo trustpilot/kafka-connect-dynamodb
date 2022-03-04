@@ -198,4 +198,39 @@ public class KclNoopCloudWatch implements AmazonCloudWatch {
     public PutInsightRuleResult putInsightRule(PutInsightRuleRequest putInsightRuleRequest) {
         return null;
     }
+
+    @Override
+    public DeleteMetricStreamResult deleteMetricStream(DeleteMetricStreamRequest deleteMetricStreamRequest) {
+        return null;
+    }
+
+    @Override
+    public GetMetricStreamResult getMetricStream(GetMetricStreamRequest getMetricStreamRequest) {
+        return null;
+    }
+
+    @Override
+    public ListMetricStreamsResult listMetricStreams(ListMetricStreamsRequest listMetricStreamsRequest) {
+        return null;
+    }
+
+    @Override
+    public PutCompositeAlarmResult putCompositeAlarm(PutCompositeAlarmRequest putCompositeAlarmRequest) {
+        return null;
+    }
+
+    @Override
+    public PutMetricStreamResult putMetricStream(PutMetricStreamRequest putMetricStreamRequest) {
+        return null;
+    }
+
+    @Override
+    public StartMetricStreamsResult startMetricStreams(StartMetricStreamsRequest startMetricStreamsRequest) {
+        return null;
+    }
+
+    @Override
+    public StopMetricStreamsResult stopMetricStreams(StopMetricStreamsRequest stopMetricStreamsRequest) {
+        return null;
+    }
 }
