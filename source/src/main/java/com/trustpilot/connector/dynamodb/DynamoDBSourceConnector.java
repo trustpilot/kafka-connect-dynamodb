@@ -57,12 +57,14 @@ public class DynamoDBSourceConnector extends SourceConnector {
                 AwsClients.buildAWSResourceGroupsTaggingAPIClient(config.getAwsRegion(),
                                                                   config.getResourceTaggingServiceEndpoint(),
                                                                   config.getAwsAccessKeyIdValue(),
-                                                                  config.getAwsSecretKeyValue());
+                                                                  config.getAwsSecretKeyValue(),
+                                                                  config.getAwsAssumeRoleArn());
 
         AmazonDynamoDB dynamoDBClient = AwsClients.buildDynamoDbClient(config.getAwsRegion(),
                                                                        config.getDynamoDBServiceEndpoint(),
                                                                        config.getAwsAccessKeyIdValue(),
-                                                                       config.getAwsSecretKeyValue());
+                                                                       config.getAwsSecretKeyValue(),
+                                                                       config.getAwsAssumeRoleArn());
 
         if (tablesProvider == null) {
             if (config.getWhitelistTables() != null) {
