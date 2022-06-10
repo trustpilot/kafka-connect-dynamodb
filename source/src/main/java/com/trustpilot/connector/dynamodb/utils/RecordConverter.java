@@ -45,7 +45,7 @@ public class RecordConverter {
 
     public RecordConverter(TableDescription tableDesc, String topicNamePrefix) {
         this.tableDesc = tableDesc;
-        this.topic_name = topicNamePrefix + tableDesc.getTableName();
+        this.topic_name = topicNamePrefix;
 
         valueSchema = SchemaBuilder.struct()
                                    .name(SchemaNameAdjuster.DEFAULT.adjust( "com.trustpilot.connector.dynamodb.envelope"))
