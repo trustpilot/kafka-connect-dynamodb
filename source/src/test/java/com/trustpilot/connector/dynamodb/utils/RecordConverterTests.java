@@ -88,7 +88,7 @@ public class RecordConverterTests {
         );
 
         // Assert
-        assertEquals("TestTopicPrefix-TestTable1", record.topic());
+        assertEquals("TestTopicPrefix-", record.topic());
     }
 
     @Test
