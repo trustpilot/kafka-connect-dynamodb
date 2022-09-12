@@ -3,6 +3,7 @@ package com.trustpilot.connector.dynamodb.utils;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.KeySchemaElement;
 import com.amazonaws.services.dynamodbv2.model.TableDescription;
+import com.amazonaws.services.dynamodbv2.document.ItemUtils;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
@@ -74,6 +75,9 @@ public class RecordConverter {
                         LinkedHashMap::new
                 ));
 
+        // getUnmarshallItems from Dynamo Document
+        Map<String, Object> unMarshalledItems = ItemUtils.toSimpleMapValue(attributes);
+
         // Leveraging offsets to store shard and sequence number with each item pushed to Kafka.
         // This info will only be used to update `shardRegister` and won't be used to reset state after restart
         Map<String, Object> offsets = SourceInfo.toOffset(sourceInfo);
@@ -101,7 +105,7 @@ public class RecordConverter {
 
         Struct valueData = new Struct(valueSchema)
                 .put(Envelope.FieldName.VERSION, sourceInfo.version)
-                .put(Envelope.FieldName.DOCUMENT, objectMapper.writeValueAsString(sanitisedAttributes))
+                .put(Envelope.FieldName.DOCUMENT, objectMapper.writeValueAsString(unMarshalledItems))
                 .put(Envelope.FieldName.SOURCE, SourceInfo.toStruct(sourceInfo))
                 .put(Envelope.FieldName.OPERATION, op.code())
                 .put(Envelope.FieldName.TIMESTAMP, arrivalTimestamp.toEpochMilli());

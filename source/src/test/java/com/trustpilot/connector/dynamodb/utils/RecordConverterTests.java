@@ -199,7 +199,7 @@ public class RecordConverterTests {
         );
 
         // Assert
-        assertEquals("{\"testKV1\":{\"s\":\"testKV1Value\"},\"testKV2\":{\"s\":\"2\"},\"testV2\":{\"s\":\"testStringValue\"},\"testV1\":{\"n\":\"1\"}}",
+        assertEquals("{\"testKV1\":\"testKV1Value\",\"testKV2\":\"2\",\"testV2\":\"testStringValue\",\"testV1\":1}",
                      ((Struct) record.value()).getString("document"));
     }
 
@@ -271,7 +271,7 @@ public class RecordConverterTests {
                 "testSequenceNumberID1"
         );
 
-        String expected = "{\"test1234\":{\"s\":\"testKV1Value\"},\"_starts_with_underscore\":{\"n\":\"1\"},\"startswithnumber\":{\"s\":\"2\"},\"test\":{\"s\":\"testStringValue\"}}";
+        String expected = "{\"test-1234\":\"testKV1Value\",\"_starts_with_underscore\":1,\"1-starts-with-number\":\"2\",\"test!@£$%^\":\"testStringValue\"}";
 
         // Assert
         assertEquals(expected,
