@@ -278,7 +278,7 @@ public class DynamoDBSourceTaskTests {
 
         assertEquals(1, response.size());
         assertEquals("r", ((Struct) response.get(0).value()).getString("op"));
-        assertEquals(({"col2":"val1","col3":1,"col1":"key1"}), ((Struct) response.get(0).value()).getString("document"));
+        assertEquals(("{\"col2\":\"val1\",\"col3\":1,\"col1\":\"key1\"}"), ((Struct) response.get(0).value()).getString("document"));
         assertEquals(InitSyncStatus.RUNNING, task.getSourceInfo().initSyncStatus);
         assertEquals(exclusiveStartKey, task.getSourceInfo().exclusiveStartKey);
     }
