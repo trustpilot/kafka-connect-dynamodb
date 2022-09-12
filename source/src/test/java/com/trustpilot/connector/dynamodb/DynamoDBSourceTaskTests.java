@@ -278,7 +278,7 @@ public class DynamoDBSourceTaskTests {
 
         assertEquals(1, response.size());
         assertEquals("r", ((Struct) response.get(0).value()).getString("op"));
-        assertEquals("{\"col2\":{\"s\":\"val1\"},\"col3\":{\"n\":\"1\"},\"col1\":{\"s\":\"key1\"}}", ((Struct) response.get(0).value()).getString("document"));
+        assertEquals(({"col2":"val1","col3":1,"col1":"key1"}), ((Struct) response.get(0).value()).getString("document"));
         assertEquals(InitSyncStatus.RUNNING, task.getSourceInfo().initSyncStatus);
         assertEquals(exclusiveStartKey, task.getSourceInfo().exclusiveStartKey);
     }
@@ -560,8 +560,8 @@ public class DynamoDBSourceTaskTests {
 
         // Assert
         assertEquals(3, response.size());
-        assertEquals("{\"col2\":{\"s\":\"val1\"},\"col3\":{\"n\":\"1\"},\"col1\":{\"s\":\"key1\"}}", ((Struct) response.get(0).value()).getString("document"));
-        assertEquals("{\"col1\":{\"s\":\"key2\"}}", ((Struct) response.get(1).value()).getString("document"));
+        assertEquals("{\"col2\":\"val1\",\"col3\":1,\"col1\":\"key1\"}", ((Struct) response.get(0).value()).getString("document"));
+        assertEquals("{\"col1\":\"key2\"}", ((Struct) response.get(1).value()).getString("document"));
         assertNull(response.get(2).value());  // tombstone
     }
 
