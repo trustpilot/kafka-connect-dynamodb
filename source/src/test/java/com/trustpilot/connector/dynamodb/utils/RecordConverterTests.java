@@ -1,6 +1,3 @@
-
-
-
 package com.trustpilot.connector.dynamodb.utils;
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
@@ -21,6 +18,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -198,9 +198,16 @@ public class RecordConverterTests {
                 "testSequenceNumberID1"
         );
 
+        String expected = "\"{\\n  \\\"testKV1\\\": \\\"testKV1Value\\\",\\n  \\\"testKV2\\\": \\\"2\\\",\\n  \\\"testV2\\\": \\\"testStringValue\\\",\\n  \\\"testV1\\\": 1\\n}\"";
+        String actual = ((Struct) record.value()).getString("document");
+
+        // Converting both expected and actual to JSON string
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        expected = gson.toJson(expected);
+        actual = gson.toJson(actual);
+
         // Assert
-        assertEquals("{\"testKV1\":\"testKV1Value\",\"testKV2\":\"2\",\"testV2\":\"testStringValue\",\"testV1\":1}",
-                     ((Struct) record.value()).getString("document"));
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -271,11 +278,16 @@ public class RecordConverterTests {
                 "testSequenceNumberID1"
         );
 
-        String expected = "{\"test-1234\":\"testKV1Value\",\"_starts_with_underscore\":1,\"1-starts-with-number\":\"2\",\"test!@£$%^\":\"testStringValue\"}";
+        String expected = "\"{\\n  \\\"test-1234\\\": \\\"testKV1Value\\\",\\n  \\\"_starts_with_underscore\\\": 1,\\n  \\\"1-starts-with-number\\\": \\\"2\\\",\\n  \\\"test!@£$%^\\\": \\\"testStringValue\\\"\\n}\"";
+        String actual = ((Struct) record.value()).getString("document");
+
+        // Converting both expected and actual to JSON string
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        expected = gson.toJson(expected);
+        actual = gson.toJson(actual);
 
         // Assert
-        assertEquals(expected,
-                ((Struct) record.value()).getString("document"));
+        assertEquals(expected, actual);
     }
 
     @Test
