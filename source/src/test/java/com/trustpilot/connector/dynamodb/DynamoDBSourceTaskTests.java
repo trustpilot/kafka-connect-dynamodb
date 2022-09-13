@@ -23,6 +23,9 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -272,13 +275,21 @@ public class DynamoDBSourceTaskTests {
         task.start(configs);
         List<SourceRecord> response = task.poll();
 
+        String expected = "\"{\\n  \\\"col2\\\": \\\"val1\\\",\\n  \\\"col3\\\": 1,\\n  \\\"col1\\\": \\\"key1\\\"\\n}\"";
+        String actual = (((Struct) response.get(0).value()).getString("document"));
+
+        // Converting both expected and actual to JSON string
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        expected = gson.toJson(expected);
+        actual = gson.toJson(actual);
+
         // Assert
         assertEquals(Instant.parse("2001-01-01T00:00:00.00Z"), task.getSourceInfo().lastInitSyncStart);
         assertEquals(1, task.getSourceInfo().initSyncCount);
 
         assertEquals(1, response.size());
         assertEquals("r", ((Struct) response.get(0).value()).getString("op"));
-        assertEquals(({"col2":"val1","col3":1,"col1":"key1"}), ((Struct) response.get(0).value()).getString("document"));
+        assertEquals(expected , actual);
         assertEquals(InitSyncStatus.RUNNING, task.getSourceInfo().initSyncStatus);
         assertEquals(exclusiveStartKey, task.getSourceInfo().exclusiveStartKey);
     }
@@ -557,11 +568,23 @@ public class DynamoDBSourceTaskTests {
         // Act
         task.start(configs);
         List<SourceRecord> response = task.poll();
+        
+        String expected = "\"{\\n  \\\"col2\\\": \\\"val1\\\",\\n  \\\"col3\\\": 1,\\n  \\\"col1\\\": \\\"key1\\\"\\n}\"";
+        String expected_document_key = "\"{\\n  \\\"col1\\\": \\\"key2\\\"\\n}\"";
+        String actual = (((Struct) response.get(0).value()).getString("document"));
+        String actual_document_key = ((Struct) response.get(1).value()).getString("document");
+
+        // Converting both expected and actual to JSON string
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        expected = gson.toJson(expected);
+        expected_document_key = gson.toJson(expected_document_key);
+        actual = gson.toJson(actual);
+        actual_document_key = gson.toJson(actual_document_key);
 
         // Assert
         assertEquals(3, response.size());
-        assertEquals("{\"col2\":\"val1\",\"col3\":1,\"col1\":\"key1\"}", ((Struct) response.get(0).value()).getString("document"));
-        assertEquals("{\"col1\":\"key2\"}", ((Struct) response.get(1).value()).getString("document"));
+        assertEquals(expected, actual);
+        assertEquals(expected_document_key, actual_document_key);
         assertNull(response.get(2).value());  // tombstone
     }
 

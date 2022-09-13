@@ -21,6 +21,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -76,7 +82,19 @@ public class RecordConverter {
                 ));
 
         // getUnmarshallItems from Dynamo Document
-        Map<String, Object> unMarshalledItems = ItemUtils.toSimpleMapValue(attributes);
+        //Map<String, Object> unMarshalledItems = ItemUtils.toSimpleMapValue(attributes);
+
+        //JSON conversion
+        String outputJsonString = null;
+        try {
+            String jsonString = ItemUtils.toItem(attributes).toJSON();       
+            JsonObject jsonObject = new JsonParser().parse(jsonString).getAsJsonObject();   
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            outputJsonString = gson.toJson(jsonObject); 
+        } catch (JsonParseException e) {
+            e.printStackTrace();
+            throw new Exception("Error Occured in JSON Parsing " + e.getMessage(), e);            
+        }
 
         // Leveraging offsets to store shard and sequence number with each item pushed to Kafka.
         // This info will only be used to update `shardRegister` and won't be used to reset state after restart
@@ -105,7 +123,7 @@ public class RecordConverter {
 
         Struct valueData = new Struct(valueSchema)
                 .put(Envelope.FieldName.VERSION, sourceInfo.version)
-                .put(Envelope.FieldName.DOCUMENT, objectMapper.writeValueAsString(unMarshalledItems))
+                .put(Envelope.FieldName.DOCUMENT, objectMapper.writeValueAsString(outputJsonString))
                 .put(Envelope.FieldName.SOURCE, SourceInfo.toStruct(sourceInfo))
                 .put(Envelope.FieldName.OPERATION, op.code())
                 .put(Envelope.FieldName.TIMESTAMP, arrivalTimestamp.toEpochMilli());
