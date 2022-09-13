@@ -19,8 +19,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonObject;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -75,7 +75,7 @@ public class RecordConverterTests {
     @Test
     public void correctTopicNameIsConstructed() throws Exception {
         // Arrange
-        RecordConverter converter = new RecordConverter(getTableDescription(null), "TestTopicPrefix-");
+        RecordConverter converter = new RecordConverter(getTableDescription(null), "TestTopicPrefix");
 
         // Act
         SourceRecord record = converter.toSourceRecord(
@@ -88,13 +88,13 @@ public class RecordConverterTests {
         );
 
         // Assert
-        assertEquals("TestTopicPrefix-", record.topic());
+        assertEquals("TestTopicPrefix", record.topic());
     }
 
     @Test
     public void sourceInfoIsPutToOffset() throws Exception {
         // Arrange
-        RecordConverter converter = new RecordConverter(getTableDescription(null), "TestTopicPrefix-");
+        RecordConverter converter = new RecordConverter(getTableDescription(null), "TestTopicPrefix");
 
         // Act
         SourceRecord record = converter.toSourceRecord(
@@ -113,7 +113,7 @@ public class RecordConverterTests {
     @Test
     public void shardIdAndSequenceNumberIsPutToOffset() throws Exception {
         // Arrange
-        RecordConverter converter = new RecordConverter(getTableDescription(null), "TestTopicPrefix-");
+        RecordConverter converter = new RecordConverter(getTableDescription(null), "TestTopicPrefix");
 
         // Act
         SourceRecord record = converter.toSourceRecord(
@@ -136,7 +136,7 @@ public class RecordConverterTests {
         List<KeySchemaElement> keySchema = new LinkedList<>();
         keySchema.add(new KeySchemaElement().withKeyType("S").withAttributeName("testKV1"));
 
-        RecordConverter converter = new RecordConverter(getTableDescription(keySchema), "TestTopicPrefix-");
+        RecordConverter converter = new RecordConverter(getTableDescription(keySchema), "TestTopicPrefix");
 
         // Act
         SourceRecord record = converter.toSourceRecord(
@@ -161,7 +161,7 @@ public class RecordConverterTests {
         keySchema.add(new KeySchemaElement().withKeyType("S").withAttributeName("testKV1"));
         keySchema.add(new KeySchemaElement().withKeyType("N").withAttributeName("testKV2"));
 
-        RecordConverter converter = new RecordConverter(getTableDescription(keySchema), "TestTopicPrefix-");
+        RecordConverter converter = new RecordConverter(getTableDescription(keySchema), "TestTopicPrefix");
 
         // Act
         SourceRecord record = converter.toSourceRecord(
@@ -186,7 +186,7 @@ public class RecordConverterTests {
     @Test
     public void recordAttributesAreAddedToValueData() throws Exception {
         // Arrange
-        RecordConverter converter = new RecordConverter(getTableDescription(null), "TestTopicPrefix-");
+        RecordConverter converter = new RecordConverter(getTableDescription(null), "TestTopicPrefix");
 
         // Act
         SourceRecord record = converter.toSourceRecord(
@@ -198,16 +198,12 @@ public class RecordConverterTests {
                 "testSequenceNumberID1"
         );
 
-        String expected = "\"{\\n  \\\"testKV1\\\": \\\"testKV1Value\\\",\\n  \\\"testKV2\\\": \\\"2\\\",\\n  \\\"testV2\\\": \\\"testStringValue\\\",\\n  \\\"testV1\\\": 1\\n}\"";
-        String actual = ((Struct) record.value()).getString("document");
-
-        // Converting both expected and actual to JSON string
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        expected = gson.toJson(expected);
-        actual = gson.toJson(actual);
+        String expected = "{testKV1:testKV1Value,testKV2:'2',testV2:testStringValue,testV1:1}";
+        JsonObject expectedJson = new JsonParser().parse(expected).getAsJsonObject();
 
         // Assert
-        assertEquals(expected, actual);
+        assertEquals(expectedJson.toString(),
+                     ((Struct) record.value()).getString("document"));
     }
 
     @Test
@@ -216,7 +212,7 @@ public class RecordConverterTests {
         List<KeySchemaElement> keySchema = new LinkedList<>();
         keySchema.add(new KeySchemaElement().withKeyType("S").withAttributeName("test-1234"));
 
-        RecordConverter converter = new RecordConverter(getTableDescription(keySchema), "TestTopicPrefix-");
+        RecordConverter converter = new RecordConverter(getTableDescription(keySchema), "TestTopicPrefix");
 
         // Act
         SourceRecord record = converter.toSourceRecord(
@@ -241,7 +237,7 @@ public class RecordConverterTests {
         keySchema.add(new KeySchemaElement().withKeyType("S").withAttributeName("test-1234"));
         keySchema.add(new KeySchemaElement().withKeyType("N").withAttributeName("1-starts-with-number"));
 
-        RecordConverter converter = new RecordConverter(getTableDescription(keySchema), "TestTopicPrefix-");
+        RecordConverter converter = new RecordConverter(getTableDescription(keySchema), "TestTopicPrefix");
 
         // Act
         SourceRecord record = converter.toSourceRecord(
@@ -266,7 +262,7 @@ public class RecordConverterTests {
     @Test
     public void recordAttributesAreAddedToValueDataWhenAttributesContainsInvalidCharacters() throws Exception {
         // Arrange
-        RecordConverter converter = new RecordConverter(getTableDescription(null), "TestTopicPrefix-");
+        RecordConverter converter = new RecordConverter(getTableDescription(null), "TestTopicPrefix");
 
         // Act
         SourceRecord record = converter.toSourceRecord(
@@ -278,22 +274,18 @@ public class RecordConverterTests {
                 "testSequenceNumberID1"
         );
 
-        String expected = "\"{\\n  \\\"test-1234\\\": \\\"testKV1Value\\\",\\n  \\\"_starts_with_underscore\\\": 1,\\n  \\\"1-starts-with-number\\\": \\\"2\\\",\\n  \\\"test!@£$%^\\\": \\\"testStringValue\\\"\\n}\"";
-        String actual = ((Struct) record.value()).getString("document");
-
-        // Converting both expected and actual to JSON string
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        expected = gson.toJson(expected);
-        actual = gson.toJson(actual);
+        String expected = "{test-1234:testKV1Value,_starts_with_underscore:1,1-starts-with-number:'2',test!@£$%^:testStringValue}";
+        JsonObject expectedJson = new JsonParser().parse(expected).getAsJsonObject();
 
         // Assert
-        assertEquals(expected, actual);
+        assertEquals(expectedJson.toString(),
+                ((Struct) record.value()).getString("document"));
     }
 
     @Test
     public void sourceInfoIsAddedToValueData() throws Exception {
         // Arrange
-        RecordConverter converter = new RecordConverter(getTableDescription(null), "TestTopicPrefix-");
+        RecordConverter converter = new RecordConverter(getTableDescription(null), "TestTopicPrefix");
 
         // Act
         SourceRecord record = converter.toSourceRecord(
@@ -315,7 +307,7 @@ public class RecordConverterTests {
     @Test
     public void operationIsAddedToValueData() throws Exception {
         // Arrange
-        RecordConverter converter = new RecordConverter(getTableDescription(null), "TestTopicPrefix-");
+        RecordConverter converter = new RecordConverter(getTableDescription(null), "TestTopicPrefix");
 
         // Act
         SourceRecord record = converter.toSourceRecord(
@@ -334,7 +326,7 @@ public class RecordConverterTests {
     @Test
     public void arrivalTimestampIsAddedToValueData() throws Exception {
         // Arrange
-        RecordConverter converter = new RecordConverter(getTableDescription(null), "TestTopicPrefix-");
+        RecordConverter converter = new RecordConverter(getTableDescription(null), "TestTopicPrefix");
 
         // Act
         SourceRecord record = converter.toSourceRecord(
