@@ -19,7 +19,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
@@ -41,14 +40,22 @@ public class RecordConverter {
     private final TableDescription tableDesc;
     private final String topic_name;
     private Schema keySchema;
-    private Schema valueSchema;
+    private final Schema valueSchema;
 
     private List<String> keys;
 
     public RecordConverter(TableDescription tableDesc, String topicNamePrefix) {
         this.tableDesc = tableDesc;
-        this.topic_name = topicNamePrefix;          
+        this.topic_name = topicNamePrefix;
 
+        valueSchema = SchemaBuilder.struct()
+                                   .name(SchemaNameAdjuster.DEFAULT.adjust( "com.trustpilot.connector.dynamodb.envelope"))
+                                   .field(Envelope.FieldName.VERSION, Schema.STRING_SCHEMA)
+                                   .field(Envelope.FieldName.DOCUMENT, DynamoDbJson.schema())
+                                   .field(Envelope.FieldName.SOURCE, SourceInfo.structSchema())
+                                   .field(Envelope.FieldName.OPERATION, Schema.STRING_SCHEMA)
+                                   .field(Envelope.FieldName.TIMESTAMP, Schema.INT64_SCHEMA)
+                                   .build();
     }
 
     public SourceRecord toSourceRecord(
@@ -69,20 +76,7 @@ public class RecordConverter {
                 ));
 
         // getUnmarshallItems from Dynamo Document
-        //Map<String, Object> unMarshalledItems = ItemUtils.toSimpleMapValue(attributes);
-
-         //JSON conversion
-        //String outputJsonString = ItemUtils.toItem(attributes).toJSON();   
-        Struct dynamoAttributes = getAttributeValueStruct(sanitisedAttributes);          
-
-        valueSchema = SchemaBuilder.struct()
-        .name(SchemaNameAdjuster.DEFAULT.adjust( "com.trustpilot.connector.dynamodb.envelope"))
-        .field(Envelope.FieldName.VERSION, Schema.STRING_SCHEMA)
-        .field(Envelope.FieldName.DOCUMENT, getAttributeValueSchema(sanitisedAttributes))
-        .field(Envelope.FieldName.SOURCE, SourceInfo.structSchema())
-        .field(Envelope.FieldName.OPERATION, Schema.STRING_SCHEMA)
-        .field(Envelope.FieldName.TIMESTAMP, Schema.INT64_SCHEMA)
-        .build();
+        Map<String, Object> unMarshalledItems = ItemUtils.toSimpleMapValue(attributes);
 
         // Leveraging offsets to store shard and sequence number with each item pushed to Kafka.
         // This info will only be used to update `shardRegister` and won't be used to reset state after restart
@@ -111,7 +105,7 @@ public class RecordConverter {
 
         Struct valueData = new Struct(valueSchema)
                 .put(Envelope.FieldName.VERSION, sourceInfo.version)
-                .put(Envelope.FieldName.DOCUMENT, dynamoAttributes) // objectMapper.writeValueAsString(outputJsonString))
+                .put(Envelope.FieldName.DOCUMENT, objectMapper.writeValueAsString(unMarshalledItems))
                 .put(Envelope.FieldName.SOURCE, SourceInfo.toStruct(sourceInfo))
                 .put(Envelope.FieldName.OPERATION, op.code())
                 .put(Envelope.FieldName.TIMESTAMP, arrivalTimestamp.toEpochMilli());
@@ -148,65 +142,4 @@ public class RecordConverter {
 
         return sanitisedAttributeName;
     }
-
-    public static Struct getAttributeValueStruct(Map<String, AttributeValue> attributes) {        
-        final Struct attributeValueStruct = new Struct(getAttributeValueSchema(attributes));
-        
-        // Mapping dynamo db attributes to schema registry types (dynamo db attributes are documented at below link)
-        //https://github.com/aws/aws-sdk-java/blob/master/aws-java-sdk-dynamodb/src/main/java/com/amazonaws/services/dynamodbv2/model/AttributeValue.java
-
-        for (Map.Entry<String, AttributeValue> attribute : attributes.entrySet()) {
-            final String attributeName = attribute.getKey();
-            final AttributeValue attributeValue = attribute.getValue();
-            if (attributeValue.getS() != null) {
-                attributeValueStruct.put(attributeName, attributeValue.getS());
-            } else if (attributeValue.getN() != null) {
-                attributeValueStruct.put(attributeName, attributeValue.getN());
-            } else if (attributeValue.getB() != null) {
-                attributeValueStruct.put(attributeName, attributeValue.getB());
-            } else if (attributeValue.getSS() != null) {
-                attributeValueStruct.put(attributeName, attributeValue.getSS());
-            } else if (attributeValue.getNS() != null) {
-                attributeValueStruct.put(attributeName, attributeValue.getNS());
-            } else if (attributeValue.getBS() != null) {
-                attributeValueStruct.put(attributeName, attributeValue.getBS());
-            } else if (attributeValue.getNULL() != null) {
-                attributeValueStruct.put(attributeName, attributeValue.getNULL());
-            } else if (attributeValue.getBOOL() != null) {
-                attributeValueStruct.put(attributeName, attributeValue.getBOOL());
-            }           
-        }
-        return attributeValueStruct;
-    }
-
-    public static Schema getAttributeValueSchema(Map<String, AttributeValue> attributes) {        
-        SchemaBuilder RECORD_ATTRIBUTES_SCHEMA = SchemaBuilder.struct().name("DynamoDB.AttributeValue");
-
-        // Mapping dynamo db attributes to schema registry types (dynamo db attributes are documented at below link)
-        //https://github.com/aws/aws-sdk-java/blob/master/aws-java-sdk-dynamodb/src/main/java/com/amazonaws/services/dynamodbv2/model/AttributeValue.java
-
-        for (Map.Entry<String, AttributeValue> attribute : attributes.entrySet()) {
-            final String attributeName = attribute.getKey();
-            final AttributeValue attributeValue = attribute.getValue();
-            if (attributeValue.getS() != null) {
-                RECORD_ATTRIBUTES_SCHEMA.field(attributeName, Schema.STRING_SCHEMA);
-            } else if (attributeValue.getN() != null) {
-                RECORD_ATTRIBUTES_SCHEMA.field(attributeName, Schema.STRING_SCHEMA);
-            } else if (attributeValue.getB() != null) {
-                RECORD_ATTRIBUTES_SCHEMA.field(attributeName, Schema.BYTES_SCHEMA);
-            } else if (attributeValue.getSS() != null) {
-                RECORD_ATTRIBUTES_SCHEMA.field(attributeName, SchemaBuilder.array(Schema.STRING_SCHEMA));
-            } else if (attributeValue.getNS() != null) {
-                RECORD_ATTRIBUTES_SCHEMA.field(attributeName, SchemaBuilder.array(Schema.STRING_SCHEMA));
-            } else if (attributeValue.getBS() != null) {
-                RECORD_ATTRIBUTES_SCHEMA.field(attributeName, SchemaBuilder.array(Schema.BYTES_SCHEMA));
-            } else if (attributeValue.getNULL() != null) {
-                RECORD_ATTRIBUTES_SCHEMA.field(attributeName, Schema.BOOLEAN_SCHEMA);
-            } else if (attributeValue.getBOOL() != null) {
-                RECORD_ATTRIBUTES_SCHEMA.field(attributeName, Schema.BOOLEAN_SCHEMA);
-            }           
-        }
-        return RECORD_ATTRIBUTES_SCHEMA.build();
-    }
-    
 }
