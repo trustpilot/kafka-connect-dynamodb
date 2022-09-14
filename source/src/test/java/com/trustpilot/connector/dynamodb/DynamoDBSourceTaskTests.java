@@ -23,6 +23,10 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.kafka.connect.data.Field;
+import org.apache.kafka.connect.data.Schema;
+import org.apache.kafka.connect.data.SchemaBuilder;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -275,6 +279,19 @@ public class DynamoDBSourceTaskTests {
         // Assert
         assertEquals(Instant.parse("2001-01-01T00:00:00.00Z"), task.getSourceInfo().lastInitSyncStart);
         assertEquals(1, task.getSourceInfo().initSyncCount);
+
+        final Schema expectedDocumentSchema = SchemaBuilder.struct().name("DynamoDB.AttributeValue")
+                .field("col2", Schema.STRING_SCHEMA)
+                .field("col3", Schema.STRING_SCHEMA)
+                .field("col1", Schema.STRING_SCHEMA)
+                .build();
+
+        final Struct expectedDocument = new Struct(expectedDocumentSchema)
+                .put("col2","val1")
+                .put("col3","1")
+                .put("col1","key1");
+
+        Struct actualDocument = ((Struct) response.get(0).value()).getStruct("document") ;
 
         assertEquals(1, response.size());
         assertEquals("r", ((Struct) response.get(0).value()).getString("op"));
@@ -558,10 +575,30 @@ public class DynamoDBSourceTaskTests {
         task.start(configs);
         List<SourceRecord> response = task.poll();
 
+        final Schema expectedDocumentSchema = SchemaBuilder.struct().name("DynamoDB.AttributeValue")
+                                        .field("col2", Schema.STRING_SCHEMA)
+                                        .field("col3", Schema.STRING_SCHEMA)
+                                        .field("col1", Schema.STRING_SCHEMA)
+                                        .build();
+        final Struct expectedDocument = new Struct(expectedDocumentSchema)
+                                        .put("col2","val1")
+                                        .put("col3","1")
+                                        .put("col1","key1");
+
+        final Schema expectedDocumentColSchema = SchemaBuilder.struct().name("DynamoDB.AttributeValue")
+                                        .field("col1", Schema.STRING_SCHEMA)
+                                        .build();
+
+        final Struct expectedDocColValue = new Struct(expectedDocumentColSchema)
+                                        .put("col1","key2");
+
+        Struct actualDocument = ((Struct) response.get(0).value()).getStruct("document") ;
+        Struct actualDocumentCol = ((Struct) response.get(1).value()).getStruct("document");
+
         // Assert
         assertEquals(3, response.size());
-        assertEquals("{\"col2\":\"val1\",\"col3\":1,\"col1\":\"key1\"}", ((Struct) response.get(0).value()).getString("document"));
-        assertEquals("{\"col1\":\"key2\"}", ((Struct) response.get(1).value()).getString("document"));
+        compareStructs(expectedDocument, actualDocument);
+        compareStructs(expectedDocColValue, actualDocumentCol);
         assertNull(response.get(2).value());  // tombstone
     }
 
@@ -874,5 +911,4 @@ public class DynamoDBSourceTaskTests {
         // Assert
         assertEquals("", shardRegister.get("shard1").getLastCommittedRecordSeqNo());
     }
-
 }
