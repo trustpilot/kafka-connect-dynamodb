@@ -18,11 +18,14 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
-import com.google.gson.JsonParser;
-import com.google.gson.JsonObject;
+import org.apache.kafka.connect.data.Field;
+import org.apache.kafka.connect.data.Schema;
+import org.apache.kafka.connect.data.SchemaBuilder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 @SuppressWarnings("SameParameterValue")
@@ -198,12 +201,27 @@ public class RecordConverterTests {
                 "testSequenceNumberID1"
         );
 
-        String expected = "{testKV1:testKV1Value,testKV2:'2',testV2:testStringValue,testV1:1}";
-        JsonObject expectedJson = new JsonParser().parse(expected).getAsJsonObject();
+        //String expected = "{testKV1:testKV1Value,testKV2:'2',testV2:testStringValue,testV1:1}";
+        //JsonObject expectedJson = new JsonParser().parse(expected).getAsJsonObject();
+        
+        final Schema expectedDocumentSchema = SchemaBuilder.struct().name("DynamoDB.AttributeValue")
+                                        .field("testKV1", Schema.STRING_SCHEMA)
+                                        .field("testKV2", Schema.STRING_SCHEMA)
+                                        .field("testV2", Schema.STRING_SCHEMA)
+                                        .field("testV1", Schema.STRING_SCHEMA)
+                                        .build();
+
+        final Struct expectedDocument = new Struct(expectedDocumentSchema)
+                                        .put("testKV1","testKV1Value")
+                                        .put("testKV2","2")
+                                        .put("testV2","testStringValue")
+                                        .put("testV1","1");
+        
+        Struct actualDocument = ((Struct) record.value()).getStruct("document") ;
 
         // Assert
-        assertEquals(expectedJson.toString(),
-                     ((Struct) record.value()).getString("document"));
+        //assertEquals(expectedJson.toString(), ((Struct) record.value()).getString("document"));
+        compareStructs(expectedDocument, actualDocument);
     }
 
     @Test
@@ -274,12 +292,25 @@ public class RecordConverterTests {
                 "testSequenceNumberID1"
         );
 
-        String expected = "{test-1234:testKV1Value,_starts_with_underscore:1,1-starts-with-number:'2',test!@£$%^:testStringValue}";
-        JsonObject expectedJson = new JsonParser().parse(expected).getAsJsonObject();
+        //String expected = "{test-1234:testKV1Value,_starts_with_underscore:1,1-starts-with-number:'2',test!@£$%^:testStringValue}";
+        //JsonObject expectedJson = new JsonParser().parse(expected).getAsJsonObject();
 
+        final Schema expectedDocumentSchema = SchemaBuilder.struct().name("DynamoDB.AttributeValue")
+                                        .field("test1234", Schema.STRING_SCHEMA)
+                                        .field("_starts_with_underscore", Schema.STRING_SCHEMA)
+                                        .field("startswithnumber", Schema.STRING_SCHEMA)
+                                        .field("test", Schema.STRING_SCHEMA)
+                                        .build();
+
+        final Struct expectedDocument = new Struct(expectedDocumentSchema)
+                                        .put("test1234","testKV1Value")
+                                        .put("_starts_with_underscore","1")
+                                        .put("startswithnumber","2")
+                                        .put("test","testStringValue");
+
+        Struct actualDocument = ((Struct) record.value()).getStruct("document") ;
         // Assert
-        assertEquals(expectedJson.toString(),
-                ((Struct) record.value()).getString("document"));
+        compareStructs(expectedDocument, actualDocument);
     }
 
     @Test
@@ -342,4 +373,18 @@ public class RecordConverterTests {
         assertEquals(978393600000L, ((Struct) record.value()).getInt64("ts_ms"));
     }
 
+    public void compareStructs(Struct expectedStruct , Struct actualStruct) {
+        
+        // comparing schema for both struct
+        if (!Objects.equals(expectedStruct.schema(), actualStruct.schema())) {
+                fail("Schema expected " + expectedStruct.schema().fields() + " but actual " + actualStruct.schema().fields());
+        }
+
+        // comparing all fields for both struct
+        for (Field expectedFieldName : expectedStruct.schema().fields()) {
+                Field actualFieldName = actualStruct.schema().field(expectedFieldName.name());
+                assertEquals(expectedStruct.get(expectedFieldName), actualStruct.get(actualFieldName));
+            }
+
+    }
 }
