@@ -95,6 +95,11 @@ public class KclNoopCloudWatch implements AmazonCloudWatch {
     }
 
     @Override
+    public GetMetricStreamResult getMetricStream(GetMetricStreamRequest getMetricStreamRequest) {
+        return null;
+    }
+
+    @Override
     public GetMetricWidgetImageResult getMetricWidgetImage(GetMetricWidgetImageRequest getMetricWidgetImageRequest) {
         return null;
     }
@@ -120,6 +125,11 @@ public class KclNoopCloudWatch implements AmazonCloudWatch {
     }
 
     @Override
+    public PutCompositeAlarmResult putCompositeAlarm(PutCompositeAlarmRequest putCompositeAlarmRequest) {
+        return null;
+    }
+
+    @Override
     public PutMetricAlarmResult putMetricAlarm(PutMetricAlarmRequest putMetricAlarmRequest) {
         return null;
     }
@@ -130,7 +140,22 @@ public class KclNoopCloudWatch implements AmazonCloudWatch {
     }
 
     @Override
+    public PutMetricStreamResult putMetricStream(PutMetricStreamRequest putMetricStreamRequest) {
+        return null;
+    }
+
+    @Override
     public SetAlarmStateResult setAlarmState(SetAlarmStateRequest setAlarmStateRequest) {
+        return null;
+    }
+
+    @Override
+    public StartMetricStreamsResult startMetricStreams(StartMetricStreamsRequest startMetricStreamsRequest) {
+        return null;
+    }
+
+    @Override
+    public StopMetricStreamsResult stopMetricStreams(StopMetricStreamsRequest stopMetricStreamsRequest) {
         return null;
     }
 
@@ -170,6 +195,11 @@ public class KclNoopCloudWatch implements AmazonCloudWatch {
     }
 
     @Override
+    public DeleteMetricStreamResult deleteMetricStream(DeleteMetricStreamRequest deleteMetricStreamRequest) {
+        return null;
+    }
+
+    @Override
     public GetDashboardResult getDashboard(GetDashboardRequest getDashboardRequest) {
         return null;
     }
@@ -186,6 +216,11 @@ public class KclNoopCloudWatch implements AmazonCloudWatch {
 
     @Override
     public ListDashboardsResult listDashboards(ListDashboardsRequest listDashboardsRequest) {
+        return null;
+    }
+
+    @Override
+    public ListMetricStreamsResult listMetricStreams(ListMetricStreamsRequest listMetricStreamsRequest) {
         return null;
     }
 
