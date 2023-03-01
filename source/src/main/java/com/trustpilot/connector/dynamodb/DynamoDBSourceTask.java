@@ -152,7 +152,14 @@ public class DynamoDBSourceTask extends SourceTask {
                     eventsQueue,
                     shardRegister);
         }
-        kclWorker.start(client, dynamoDBStreamsClient, tableDesc.getTableName(), config.getTaskID(), config.getDynamoDBServiceEndpoint(), config.getKCLTableBillingMode());
+        kclWorker.start(client,
+                dynamoDBStreamsClient,
+                tableDesc.getTableName(),
+                config.getTaskID(),
+                config.getDynamoDBServiceEndpoint(),
+                config.getInitSyncSkip(),
+                config.getKCLTableBillingMode()
+        );
 
         shutdown = false;
     }
@@ -196,6 +203,9 @@ public class DynamoDBSourceTask extends SourceTask {
             if (sourceInfo.initSyncStatus == InitSyncStatus.FINISHED) {
                 return sync();
             }
+            if (sourceInfo.initSyncStatus == InitSyncStatus.SKIPPED) {
+                return sync();
+            }
             throw new Exception("Invalid SourceInfo InitSyncStatus state: " + sourceInfo.initSyncStatus);
         } catch (InterruptedException ex) {
             LOGGER.error("Failed to handle incoming records. Records dropped!", ex);
@@ -213,6 +223,8 @@ public class DynamoDBSourceTask extends SourceTask {
      * {@link SourceInfo}.
      */
     private LinkedList<SourceRecord> initSync() throws Exception {
+        // TODO: remove log
+        LOGGER.info("init sync running");
         if (sourceInfo.lastInitSyncStart.compareTo(Instant.now(clock).minus(Duration.ofHours(19))) <= 0) {
             LOGGER.error("Current INIT_SYNC took over 19 hours. Restarting INIT_SYNC! {}", sourceInfo);
             sourceInfo.startInitSync();
@@ -279,6 +291,7 @@ public class DynamoDBSourceTask extends SourceTask {
         LOGGER.debug("Waiting for records from eventsQueue for table: {}", tableDesc.getTableName());
         KclRecordsWrapper dynamoDBRecords = eventsQueue.poll(500, TimeUnit.MILLISECONDS);
         if (dynamoDBRecords == null) {
+            LOGGER.debug("null dynamoDBRecords");
             return null; // returning thread control at regular intervals
         }
 
@@ -312,12 +325,12 @@ public class DynamoDBSourceTask extends SourceTask {
                 }
 
                 // Received record which is behind "safe" zone. Indicating that "potentially" we lost some records.
-                // Need to resync...
+                // Need to resync if sync hasn't been skipped...
                 // This happens if:
                 // * connector was down for some time
                 // * connector is lagging
                 // * connector failed to finish init sync in acceptable time frame
-                if (recordIsInDangerZone(arrivalTimestamp)) {
+                if (recordIsInDangerZone(arrivalTimestamp) && sourceInfo.initSyncStatus != InitSyncStatus.SKIPPED) {
                     sourceInfo.startInitSync();
 
                     LOGGER.info(

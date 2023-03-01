@@ -21,8 +21,8 @@ In our implementation we opted to use Amazon Kinesis Client with DynamoDB Stream
 * Java 8
 * Gradlew 5.3.1
 * Kafka Connect Framework >= 2.1.1
-* Amazon Kinesis Client 1.9.1
-* DynamoDB Streams Kinesis Adapter 1.5.2
+* Amazon Kinesis Client 1.13.1
+* DynamoDB Streams Kinesis Adapter 1.5.3
 
 ## Documentation
 * [Getting started](docs/getting-started.md)
@@ -44,6 +44,7 @@ In our implementation we opted to use Amazon Kinesis Client with DynamoDB Stream
   * However you will only encounter this issue by running lots of tasks on one machine with really high load.
 
 * Synced(Source) DynamoDB table unit capacity must be large enough to ensure `INIT_SYNC` to be finished in around 16 hours. Otherwise there is a risk `INIT_SYNC` being restarted just as soon as it's finished because DynamoDB Streams store change events only for 24 hours.
+  * `INIT_SYNC` can be skipped with `init.sync.skip=true` configuration
 
 * Required AWS roles:
 ```json
