@@ -881,8 +881,34 @@ public class DynamoDBSourceTaskTests {
     }
 
     @Test
+    public void sourceInfoOfSkippedInitSyncIsLoadedFromOffsetOnStart() throws InterruptedException {
+        configs.put("init.sync.skip", "true");
+        // Arrange
+        HashMap<String, Object> offset = new HashMap<>();
+        offset.put("table_name", tableName);
+        offset.put("init_sync_state", "SKIPPED");
+        offset.put("init_sync_start", Instant.parse("2001-01-02T00:00:00.00Z").toEpochMilli());
+
+        DynamoDBSourceTask task = new SourceTaskBuilder()
+                .withOffset(offset)
+                .buildTask();
+
+        // Act
+        task.start(configs);
+
+        // Assert
+        SourceInfo sourceInfo = task.getSourceInfo();
+        assertEquals(tableName, sourceInfo.tableName);
+        assertEquals(InitSyncStatus.SKIPPED, sourceInfo.initSyncStatus);
+        assertEquals(Instant.parse("1970-01-01T00:00:00Z"), sourceInfo.lastInitSyncStart);
+        assertEquals(Instant.parse("1970-01-01T00:00:00Z"), sourceInfo.lastInitSyncEnd);
+    }
+
+    @Test
     public void skippedInitSyncOnSyncPollReturnsReceivedRecords() throws InterruptedException {
         // Arrange
+        configs.put("init.sync.skip", "true");
+
         HashMap<String, Object> offset = new HashMap<>();
         offset.put("table_name", tableName);
         offset.put("init_sync_state", "SKIPPED");
@@ -938,6 +964,7 @@ public class DynamoDBSourceTaskTests {
     @Test
     public void onStartInitSyncSkipIsNotDelayed() throws InterruptedException {
         // Arrange
+        configs.put("init.sync.skip", "true");
         configs.put("init.sync.delay.period", "2");
 
         HashMap<String, Object> offset = new HashMap<>();

@@ -89,6 +89,7 @@ public class DynamoDBSourceTask extends SourceTask {
     private SourceInfo sourceInfo;
     private TableDescription tableDesc;
     private int initSyncDelay;
+    private boolean initSyncSkip;
 
     @SuppressWarnings("unused")
     //Used by Confluent platform to initialize connector
@@ -124,6 +125,7 @@ public class DynamoDBSourceTask extends SourceTask {
         tableDesc = client.describeTable(config.getTableName()).getTable();
 
         initSyncDelay = config.getInitSyncDelay();
+        initSyncSkip = config.getInitSyncSkip();
 
         LOGGER.debug("Getting offset for table: {}", tableDesc.getTableName());
         setStateFromOffset();
@@ -169,6 +171,9 @@ public class DynamoDBSourceTask extends SourceTask {
                                             .offset(Collections.singletonMap("table_name", tableDesc.getTableName()));
         if (offset != null) {
             sourceInfo = SourceInfo.fromOffset(offset, clock);
+            if (initSyncSkip) {
+                sourceInfo.skipInitSync();
+            }
         } else {
             LOGGER.debug("No stored offset found for table: {}", tableDesc.getTableName());
             sourceInfo = new SourceInfo(tableDesc.getTableName(), clock);
@@ -223,8 +228,6 @@ public class DynamoDBSourceTask extends SourceTask {
      * {@link SourceInfo}.
      */
     private LinkedList<SourceRecord> initSync() throws Exception {
-        // TODO: remove log
-        LOGGER.info("init sync running");
         if (sourceInfo.lastInitSyncStart.compareTo(Instant.now(clock).minus(Duration.ofHours(19))) <= 0) {
             LOGGER.error("Current INIT_SYNC took over 19 hours. Restarting INIT_SYNC! {}", sourceInfo);
             sourceInfo.startInitSync();
