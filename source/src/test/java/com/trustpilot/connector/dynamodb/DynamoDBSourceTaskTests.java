@@ -884,7 +884,7 @@ public class DynamoDBSourceTaskTests {
         HashMap<String, Object> offset = new HashMap<>();
         offset.put("table_name", tableName);
         offset.put("init_sync_state", "SKIPPED");
-        offset.put("init_sync_start", Instant.parse("2001-01-02T00:00:00.00Z").toEpochMilli());
+        offset.put("init_sync_start", Instant.parse("1970-01-01T00:00:00Z").toEpochMilli());
 
         DynamoDBSourceTask task = new SourceTaskBuilder()
                 .withOffset(offset)
