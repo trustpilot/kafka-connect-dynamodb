@@ -118,7 +118,8 @@ public class DynamoDBSourceTask extends SourceTask {
                     config.getAwsRegion(),
                     config.getDynamoDBServiceEndpoint(),
                     config.getAwsAccessKeyIdValue(),
-                    config.getAwsSecretKeyValue());
+                    config.getAwsSecretKeyValue(),
+                    config.getAwsAssumeRoleArn());
         }
         tableDesc = client.describeTable(config.getTableName()).getTable();
 
@@ -142,11 +143,12 @@ public class DynamoDBSourceTask extends SourceTask {
                 config.getAwsRegion(),
                 config.getDynamoDBServiceEndpoint(),
                 config.getAwsAccessKeyIdValue(),
-                config.getAwsSecretKeyValue());
+                config.getAwsSecretKeyValue(),
+                config.getAwsAssumeRoleArn());
 
         if (kclWorker == null) {
             kclWorker = new KclWorkerImpl(
-                    AwsClients.getCredentials(config.getAwsAccessKeyIdValue(), config.getAwsSecretKeyValue()),
+                    AwsClients.getCredentials(config.getAwsAccessKeyIdValue(), config.getAwsSecretKeyValue(), config.getAwsAssumeRoleArn()),
                     eventsQueue,
                     shardRegister);
         }
