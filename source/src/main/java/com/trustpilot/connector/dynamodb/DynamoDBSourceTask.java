@@ -177,7 +177,7 @@ public class DynamoDBSourceTask extends SourceTask {
         } else {
             LOGGER.debug("No stored offset found for table: {}", tableDesc.getTableName());
             sourceInfo = new SourceInfo(tableDesc.getTableName(), clock);
-            sourceInfo.startInitSync(); // InitSyncStatus always needs to run after adding new table
+            sourceInfo.startInitSync();
         }
     }
 
