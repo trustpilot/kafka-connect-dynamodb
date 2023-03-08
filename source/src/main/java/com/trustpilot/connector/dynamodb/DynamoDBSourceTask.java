@@ -89,6 +89,7 @@ public class DynamoDBSourceTask extends SourceTask {
     private SourceInfo sourceInfo;
     private TableDescription tableDesc;
     private int initSyncDelay;
+    private boolean initSyncSkip;
 
     @SuppressWarnings("unused")
     //Used by Confluent platform to initialize connector
@@ -124,6 +125,7 @@ public class DynamoDBSourceTask extends SourceTask {
         tableDesc = client.describeTable(config.getTableName()).getTable();
 
         initSyncDelay = config.getInitSyncDelay();
+        initSyncSkip = config.getInitSyncSkip();
 
         LOGGER.debug("Getting offset for table: {}", tableDesc.getTableName());
         setStateFromOffset();
@@ -152,7 +154,14 @@ public class DynamoDBSourceTask extends SourceTask {
                     eventsQueue,
                     shardRegister);
         }
-        kclWorker.start(client, dynamoDBStreamsClient, tableDesc.getTableName(), config.getTaskID(), config.getDynamoDBServiceEndpoint(), config.getKCLTableBillingMode());
+        kclWorker.start(client,
+                dynamoDBStreamsClient,
+                tableDesc.getTableName(),
+                config.getTaskID(),
+                config.getDynamoDBServiceEndpoint(),
+                config.getInitSyncSkip(),
+                config.getKCLTableBillingMode()
+        );
 
         shutdown = false;
     }
@@ -162,10 +171,13 @@ public class DynamoDBSourceTask extends SourceTask {
                                             .offset(Collections.singletonMap("table_name", tableDesc.getTableName()));
         if (offset != null) {
             sourceInfo = SourceInfo.fromOffset(offset, clock);
+            if (initSyncSkip) {
+                sourceInfo.skipInitSync();
+            }
         } else {
             LOGGER.debug("No stored offset found for table: {}", tableDesc.getTableName());
             sourceInfo = new SourceInfo(tableDesc.getTableName(), clock);
-            sourceInfo.startInitSync(); // InitSyncStatus always needs to run after adding new table
+            sourceInfo.startInitSync();
         }
     }
 
@@ -194,6 +206,9 @@ public class DynamoDBSourceTask extends SourceTask {
                 return initSync();
             }
             if (sourceInfo.initSyncStatus == InitSyncStatus.FINISHED) {
+                return sync();
+            }
+            if (sourceInfo.initSyncStatus == InitSyncStatus.SKIPPED) {
                 return sync();
             }
             throw new Exception("Invalid SourceInfo InitSyncStatus state: " + sourceInfo.initSyncStatus);
@@ -279,6 +294,7 @@ public class DynamoDBSourceTask extends SourceTask {
         LOGGER.debug("Waiting for records from eventsQueue for table: {}", tableDesc.getTableName());
         KclRecordsWrapper dynamoDBRecords = eventsQueue.poll(500, TimeUnit.MILLISECONDS);
         if (dynamoDBRecords == null) {
+            LOGGER.debug("null dynamoDBRecords");
             return null; // returning thread control at regular intervals
         }
 
@@ -312,12 +328,12 @@ public class DynamoDBSourceTask extends SourceTask {
                 }
 
                 // Received record which is behind "safe" zone. Indicating that "potentially" we lost some records.
-                // Need to resync...
+                // Need to resync if sync hasn't been skipped...
                 // This happens if:
                 // * connector was down for some time
                 // * connector is lagging
                 // * connector failed to finish init sync in acceptable time frame
-                if (recordIsInDangerZone(arrivalTimestamp)) {
+                if (recordIsInDangerZone(arrivalTimestamp) && sourceInfo.initSyncStatus != InitSyncStatus.SKIPPED) {
                     sourceInfo.startInitSync();
 
                     LOGGER.info(
