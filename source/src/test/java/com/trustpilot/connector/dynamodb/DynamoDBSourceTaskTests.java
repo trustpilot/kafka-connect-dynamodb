@@ -876,6 +876,25 @@ public class DynamoDBSourceTaskTests {
     }
 
     @Test
+    public void initSyncIsSkippedWithNoOffsetOnStart() throws InterruptedException {
+        configs.put("init.sync.skip", "true");
+        // Arrange
+        DynamoDBSourceTask task = new SourceTaskBuilder()
+                .withOffset(null)
+                .buildTask();
+
+        // Act
+        task.start(configs);
+
+        // Assert
+        SourceInfo sourceInfo = task.getSourceInfo();
+        assertEquals(tableName, sourceInfo.tableName);
+        assertEquals(InitSyncStatus.SKIPPED, sourceInfo.initSyncStatus);
+        assertEquals(Instant.parse("1970-01-01T00:00:00Z"), sourceInfo.lastInitSyncStart);
+        assertEquals(Instant.parse("1970-01-01T00:00:00Z"), sourceInfo.lastInitSyncEnd);
+    }
+
+    @Test
     public void sourceInfoOfSkippedInitSyncIsLoadedFromOffsetOnStart() throws InterruptedException {
         configs.put("init.sync.skip", "true");
         // Arrange
