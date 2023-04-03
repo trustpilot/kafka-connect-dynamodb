@@ -20,6 +20,7 @@
     "aws.region": "eu-west-1",
     "aws.access.key.id": "",
     "aws.secret.key": "",
+    "aws.assume.role.arn": "",
 
     "dynamodb.table.env.tag.key": "environment",
     "dynamodb.table.env.tag.value": "dev",
@@ -38,6 +39,8 @@
     "connect.dynamodb.rediscovery.period": "60000"
 }
 ```
+`aws.assume.role.arn` - ARN identifier of an IAM role that the KCL and Dynamo Clients can assume for cross account access
+
 `dynamodb.table.env.tag.key` - tag key used to define environment. Useful if you have `staging` and `production` under same AWS account. Or if you want to use different Kafka Connect clusters to sync different tables.
 
 `dynamodb.table.env.tag.value` - defines from which environment to ingest tables. For e.g. 'staging' or 'production'...

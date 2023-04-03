@@ -57,6 +57,11 @@ public class DynamoDBSourceConnectorConfig extends AbstractConfig {
 	public static final String SRC_KCL_TABLE_BILLING_MODE_DISPLAY = "KCL table billing mode";
 	public static final String SRC_KCL_TABLE_BILLING_MODE_DEFAULT = "PROVISIONED";
 
+	public static final String AWS_ASSUME_ROLE_ARN_CONFIG = "aws.assume.role.arn";
+	public static final String AWS_ASSUME_ROLE_ARN_DOC = "Define which role arn the KCL/Dynamo Client should assume.";
+	public static final String AWS_ASSUME_ROLE_ARN_DISPLAY = "Assume Role Arn";
+	public static final String AWS_ASSUME_ROLE_ARN_DEFAULT = null;
+
 	public static final String DST_TOPIC_PREFIX_CONFIG = "kafka.topic.prefix";
 	public static final String DST_TOPIC_PREFIX_DOC = "Define Kafka topic destination prefix. End will be the name of a table.";
 	public static final String DST_TOPIC_PREFIX_DISPLAY = "Topic prefix";
@@ -181,6 +186,15 @@ public class DynamoDBSourceConnectorConfig extends AbstractConfig {
 						ConfigDef.Width.MEDIUM,
 						SRC_KCL_TABLE_BILLING_MODE_DISPLAY)
 
+				.define(AWS_ASSUME_ROLE_ARN_CONFIG,
+						ConfigDef.Type.STRING,
+						AWS_ASSUME_ROLE_ARN_DEFAULT,
+						ConfigDef.Importance.LOW,
+						AWS_ASSUME_ROLE_ARN_DOC,
+						AWS_GROUP, 10,
+						ConfigDef.Width.LONG,
+						AWS_ASSUME_ROLE_ARN_DISPLAY)
+
 				.define(DST_TOPIC_PREFIX_CONFIG,
 						ConfigDef.Type.STRING,
 						DST_TOPIC_PREFIX_DEFAULT,
@@ -271,5 +285,9 @@ public class DynamoDBSourceConnectorConfig extends AbstractConfig {
 
 	public BillingMode getKCLTableBillingMode() {
 		return BillingMode.fromValue(getString(SRC_KCL_TABLE_BILLING_MODE_CONFIG));
+	}
+
+	public String getAwsAssumeRoleArn() {
+		return getString(AWS_ASSUME_ROLE_ARN_CONFIG);
 	}
 }

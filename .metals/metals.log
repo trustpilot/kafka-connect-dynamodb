@@ -1,0 +1,385 @@
+2023.04.03 15:06:09 INFO  Started: Metals version 0.11.11 in workspace '/Users/xinyu.liu/src/kafka-connect-dynamodb' for client Visual Studio Code 1.76.2.
+SLF4J: No SLF4J providers were found.
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See https://www.slf4j.org/codes.html#noProviders for further details.
+SLF4J: Class path contains SLF4J bindings targeting slf4j-api versions 1.7.x or earlier.
+SLF4J: Ignoring binding found at [jar:file:/Users/xinyu.liu/Library/Caches/Coursier/v1/https/repo1.maven.org/maven2/com/outr/scribe-slf4j_2.13/3.11.0/scribe-slf4j_2.13-3.11.0.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: See https://www.slf4j.org/codes.html#ignoredBindings for an explanation.
+2023.04.03 15:06:09 INFO  time: initialize in 0.65s
+2023.04.03 15:06:12 WARN  Build server is not auto-connectable.
+2023.04.03 15:06:12 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java
+2023.04.03 15:06:13 WARN  Running javac-semanticdb failed for file:///Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java. Output:
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:3: error: package com.amazonaws.services.dynamodbv2 does not exist
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+                                        ^
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:4: error: package com.amazonaws.services.resourcegroupstaggingapi does not exist
+import com.amazonaws.services.resourcegroupstaggingapi.AWSResourceGroupsTaggingAPI;
+                                                      ^
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:5: error: package com.trustpilot.connector.dynamodb.aws does not exist
+import com.trustpilot.connector.dynamodb.aws.AwsClients;
+                                            ^
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:6: error: package com.trustpilot.connector.dynamodb.aws does not exist
+import com.trustpilot.connector.dynamodb.aws.ConfigTablesProvider;
+                                            ^
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:7: error: package com.trustpilot.connector.dynamodb.aws does not exist
+import com.trustpilot.connector.dynamodb.aws.DynamoDBTablesProvider;
+                                            ^
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:8: error: package com.trustpilot.connector.dynamodb.aws does not exist
+import com.trustpilot.connector.dynamodb.aws.TablesProvider;
+                                            ^
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:9: error: package org.apache.kafka.common.config does not exist
+import org.apache.kafka.common.config.ConfigDef;
+                                     ^
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:10: error: package org.apache.kafka.connect.connector does not exist
+import org.apache.kafka.connect.connector.ConnectorContext;
+                                         ^
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:11: error: package org.apache.kafka.connect.connector does not exist
+import org.apache.kafka.connect.connector.Task;
+                                         ^
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:12: error: package org.apache.kafka.connect.source does not exist
+import org.apache.kafka.connect.source.SourceConnector;
+                                      ^
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:13: error: package org.slf4j does not exist
+import org.slf4j.Logger;
+                ^
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:14: error: package org.slf4j does not exist
+import org.slf4j.LoggerFactory;
+                ^
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:26: error: cannot find symbol
+public class DynamoDBSourceConnector extends SourceConnector {
+                                             ^
+  symbol: class SourceConnector
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:27: error: cannot find symbol
+    private static final Logger LOGGER = LoggerFactory.getLogger(DynamoDBSourceConnector.class);
+                         ^
+  symbol:   class Logger
+  location: class DynamoDBSourceConnector
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:30: error: cannot find symbol
+    private TablesProvider tablesProvider;
+            ^
+  symbol:   class TablesProvider
+  location: class DynamoDBSourceConnector
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:41: error: cannot find symbol
+    DynamoDBSourceConnector(TablesProvider tablesProvider) {
+                            ^
+  symbol:   class TablesProvider
+  location: class DynamoDBSourceConnector
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:46: error: cannot find symbol
+    public Class<? extends Task> taskClass() {
+                           ^
+  symbol:   class Task
+  location: class DynamoDBSourceConnector
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:83: error: cannot find symbol
+    private void startBackgroundReconfigurationTasks(ConnectorContext connectorContext, long rediscoveryPeriod) {
+                                                     ^
+  symbol:   class ConnectorContext
+  location: class DynamoDBSourceConnector
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:113: error: cannot find symbol
+    public ConfigDef config() {
+           ^
+  symbol:   class ConfigDef
+  location: class DynamoDBSourceConnector
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:27: error: cannot find symbol
+    private static final Logger LOGGER = LoggerFactory.getLogger(DynamoDBSourceConnector.class);
+                                         ^
+  symbol:   variable LoggerFactory
+  location: class DynamoDBSourceConnector
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:45: error: method does not override or implement a method from a supertype
+    @Override
+    ^
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:47: error: cannot find symbol
+        return DynamoDBSourceTask.class;
+               ^
+  symbol:   class DynamoDBSourceTask
+  location: class DynamoDBSourceConnector
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:51: error: method does not override or implement a method from a supertype
+    @Override
+    ^
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:54: error: cannot find symbol
+        DynamoDBSourceConnectorConfig config = new DynamoDBSourceConnectorConfig(configProperties);
+        ^
+  symbol:   class DynamoDBSourceConnectorConfig
+  location: class DynamoDBSourceConnector
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:54: error: cannot find symbol
+        DynamoDBSourceConnectorConfig config = new DynamoDBSourceConnectorConfig(configProperties);
+                                                   ^
+  symbol:   class DynamoDBSourceConnectorConfig
+  location: class DynamoDBSourceConnector
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:56: error: cannot find symbol
+        AWSResourceGroupsTaggingAPI groupsTaggingAPIClient =
+        ^
+  symbol:   class AWSResourceGroupsTaggingAPI
+  location: class DynamoDBSourceConnector
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:57: error: cannot find symbol
+                AwsClients.buildAWSResourceGroupsTaggingAPIClient(config.getAwsRegion(),
+                ^
+  symbol:   variable AwsClients
+  location: class DynamoDBSourceConnector
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:62: error: cannot find symbol
+        AmazonDynamoDB dynamoDBClient = AwsClients.buildDynamoDbClient(config.getAwsRegion(),
+        ^
+  symbol:   class AmazonDynamoDB
+  location: class DynamoDBSourceConnector
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:62: error: cannot find symbol
+        AmazonDynamoDB dynamoDBClient = AwsClients.buildDynamoDbClient(config.getAwsRegion(),
+                                        ^
+  symbol:   variable AwsClients
+  location: class DynamoDBSourceConnector
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:69: error: cannot find symbol
+                tablesProvider = new ConfigTablesProvider(dynamoDBClient, config);
+                                     ^
+  symbol:   class ConfigTablesProvider
+  location: class DynamoDBSourceConnector
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:71: error: cannot find symbol
+                tablesProvider = new DynamoDBTablesProvider(
+                                     ^
+  symbol:   class DynamoDBTablesProvider
+  location: class DynamoDBSourceConnector
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:80: error: cannot find symbol
+        startBackgroundReconfigurationTasks(this.context, config.getRediscoveryPeriod());
+                                                ^
+  symbol: variable context
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:107: error: method does not override or implement a method from a supertype
+    @Override
+    ^
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:112: error: method does not override or implement a method from a supertype
+    @Override
+    ^
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:114: error: cannot find symbol
+        return DynamoDBSourceConnectorConfig.config;
+               ^
+  symbol:   variable DynamoDBSourceConnectorConfig
+  location: class DynamoDBSourceConnector
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:117: error: method does not override or implement a method from a supertype
+    @Override
+    ^
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:137: error: cannot find symbol
+            taskProps.put(DynamoDBSourceTaskConfig.TABLE_NAME_CONFIG, table);
+                          ^
+  symbol:   variable DynamoDBSourceTaskConfig
+  location: class DynamoDBSourceConnector
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:141: error: cannot find symbol
+            taskProps.put(DynamoDBSourceTaskConfig.TASK_ID_CONFIG, "task-1");
+                          ^
+  symbol:   variable DynamoDBSourceTaskConfig
+  location: class DynamoDBSourceConnector
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:147: error: method does not override or implement a method from a supertype
+    @Override
+    ^
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:1: error: 
+package com.trustpilot.connector.dynamodb;
+^
+40 errors
+2023.04.03 15:06:13 INFO  time: code lens generation in 1.54s
+2023.04.03 15:06:26 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java
+2023.04.03 15:06:27 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java
+2023.04.03 15:06:27 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java
+2023.04.03 15:06:27 WARN  Running javac-semanticdb failed for file:///Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java. Output:
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:3: error: package com.amazonaws.services.dynamodbv2 does not exist
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+                                        ^
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:4: error: package com.amazonaws.services.resourcegroupstaggingapi does not exist
+import com.amazonaws.services.resourcegroupstaggingapi.AWSResourceGroupsTaggingAPI;
+                                                      ^
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:5: error: package com.trustpilot.connector.dynamodb.aws does not exist
+import com.trustpilot.connector.dynamodb.aws.AwsClients;
+                                            ^
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:6: error: package com.trustpilot.connector.dynamodb.aws does not exist
+import com.trustpilot.connector.dynamodb.aws.ConfigTablesProvider;
+                                            ^
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:7: error: package com.trustpilot.connector.dynamodb.aws does not exist
+import com.trustpilot.connector.dynamodb.aws.DynamoDBTablesProvider;
+                                            ^
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:8: error: package com.trustpilot.connector.dynamodb.aws does not exist
+import com.trustpilot.connector.dynamodb.aws.TablesProvider;
+                                            ^
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:9: error: package org.apache.kafka.common.config does not exist
+import org.apache.kafka.common.config.ConfigDef;
+                                     ^
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:10: error: package org.apache.kafka.connect.connector does not exist
+import org.apache.kafka.connect.connector.ConnectorContext;
+                                         ^
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:11: error: package org.apache.kafka.connect.connector does not exist
+import org.apache.kafka.connect.connector.Task;
+                                         ^
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:12: error: package org.apache.kafka.connect.source does not exist
+import org.apache.kafka.connect.source.SourceConnector;
+                                      ^
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:13: error: package org.slf4j does not exist
+import org.slf4j.Logger;
+                ^
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:14: error: package org.slf4j does not exist
+import org.slf4j.LoggerFactory;
+                ^
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:26: error: cannot find symbol
+public class DynamoDBSourceConnector extends SourceConnector {
+                                             ^
+  symbol: class SourceConnector
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:27: error: cannot find symbol
+    private static final Logger LOGGER = LoggerFactory.getLogger(DynamoDBSourceConnector.class);
+                         ^
+  symbol:   class Logger
+  location: class DynamoDBSourceConnector
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:30: error: cannot find symbol
+    private TablesProvider tablesProvider;
+            ^
+  symbol:   class TablesProvider
+  location: class DynamoDBSourceConnector
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:41: error: cannot find symbol
+    DynamoDBSourceConnector(TablesProvider tablesProvider) {
+                            ^
+  symbol:   class TablesProvider
+  location: class DynamoDBSourceConnector
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:46: error: cannot find symbol
+    public Class<? extends Task> taskClass() {
+                           ^
+  symbol:   class Task
+  location: class DynamoDBSourceConnector
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:85: error: cannot find symbol
+    private void startBackgroundReconfigurationTasks(ConnectorContext connectorContext, long rediscoveryPeriod) {
+                                                     ^
+  symbol:   class ConnectorContext
+  location: class DynamoDBSourceConnector
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:115: error: cannot find symbol
+    public ConfigDef config() {
+           ^
+  symbol:   class ConfigDef
+  location: class DynamoDBSourceConnector
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:27: error: cannot find symbol
+    private static final Logger LOGGER = LoggerFactory.getLogger(DynamoDBSourceConnector.class);
+                                         ^
+  symbol:   variable LoggerFactory
+  location: class DynamoDBSourceConnector
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:45: error: method does not override or implement a method from a supertype
+    @Override
+    ^
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:47: error: cannot find symbol
+        return DynamoDBSourceTask.class;
+               ^
+  symbol:   class DynamoDBSourceTask
+  location: class DynamoDBSourceConnector
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:51: error: method does not override or implement a method from a supertype
+    @Override
+    ^
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:54: error: cannot find symbol
+        DynamoDBSourceConnectorConfig config = new DynamoDBSourceConnectorConfig(configProperties);
+        ^
+  symbol:   class DynamoDBSourceConnectorConfig
+  location: class DynamoDBSourceConnector
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:54: error: cannot find symbol
+        DynamoDBSourceConnectorConfig config = new DynamoDBSourceConnectorConfig(configProperties);
+                                                   ^
+  symbol:   class DynamoDBSourceConnectorConfig
+  location: class DynamoDBSourceConnector
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:56: error: cannot find symbol
+        AWSResourceGroupsTaggingAPI groupsTaggingAPIClient =
+        ^
+  symbol:   class AWSResourceGroupsTaggingAPI
+  location: class DynamoDBSourceConnector
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:57: error: cannot find symbol
+                AwsClients.buildAWSResourceGroupsTaggingAPIClient(config.getAwsRegion(),
+                ^
+  symbol:   variable AwsClients
+  location: class DynamoDBSourceConnector
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:63: error: cannot find symbol
+        AmazonDynamoDB dynamoDBClient = AwsClients.buildDynamoDbClient(config.getAwsRegion(),
+        ^
+  symbol:   class AmazonDynamoDB
+  location: class DynamoDBSourceConnector
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:63: error: cannot find symbol
+        AmazonDynamoDB dynamoDBClient = AwsClients.buildDynamoDbClient(config.getAwsRegion(),
+                                        ^
+  symbol:   variable AwsClients
+  location: class DynamoDBSourceConnector
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:71: error: cannot find symbol
+                tablesProvider = new ConfigTablesProvider(dynamoDBClient, config);
+                                     ^
+  symbol:   class ConfigTablesProvider
+  location: class DynamoDBSourceConnector
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:73: error: cannot find symbol
+                tablesProvider = new DynamoDBTablesProvider(
+                                     ^
+  symbol:   class DynamoDBTablesProvider
+  location: class DynamoDBSourceConnector
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:82: error: cannot find symbol
+        startBackgroundReconfigurationTasks(this.context, config.getRediscoveryPeriod());
+                                                ^
+  symbol: variable context
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:109: error: method does not override or implement a method from a supertype
+    @Override
+    ^
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:114: error: method does not override or implement a method from a supertype
+    @Override
+    ^
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:116: error: cannot find symbol
+        return DynamoDBSourceConnectorConfig.config;
+               ^
+  symbol:   variable DynamoDBSourceConnectorConfig
+  location: class DynamoDBSourceConnector
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:119: error: method does not override or implement a method from a supertype
+    @Override
+    ^
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:139: error: cannot find symbol
+            taskProps.put(DynamoDBSourceTaskConfig.TABLE_NAME_CONFIG, table);
+                          ^
+  symbol:   variable DynamoDBSourceTaskConfig
+  location: class DynamoDBSourceConnector
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:143: error: cannot find symbol
+            taskProps.put(DynamoDBSourceTaskConfig.TASK_ID_CONFIG, "task-1");
+                          ^
+  symbol:   variable DynamoDBSourceTaskConfig
+  location: class DynamoDBSourceConnector
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:149: error: method does not override or implement a method from a supertype
+    @Override
+    ^
+/Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnector.java:1: error: 
+package com.trustpilot.connector.dynamodb;
+^
+40 errors
+2023.04.03 15:06:42 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnectorConfig.java
+2023.04.03 15:07:18 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnectorConfig.java
+2023.04.03 15:07:21 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnectorConfig.java
+2023.04.03 15:07:21 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnectorConfig.java
+2023.04.03 15:07:21 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnectorConfig.java
+2023.04.03 15:07:22 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnectorConfig.java
+2023.04.03 15:07:32 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnectorConfig.java
+2023.04.03 15:07:32 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceConnectorConfig.java
+2023.04.03 15:08:01 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceTask.java
+2023.04.03 15:08:15 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceTask.java
+2023.04.03 15:08:16 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceTask.java
+2023.04.03 15:08:16 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceTask.java
+2023.04.03 15:08:16 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceTask.java
+2023.04.03 15:08:20 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceTask.java
+2023.04.03 15:08:20 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/DynamoDBSourceTask.java
+2023.04.03 15:08:52 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/aws/AwsClients.java
+2023.04.03 15:09:24 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/aws/AwsClients.java
+2023.04.03 15:09:24 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/aws/AwsClients.java
+2023.04.03 15:09:24 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/aws/AwsClients.java
+2023.04.03 15:09:24 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/aws/AwsClients.java
+2023.04.03 15:09:27 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/aws/AwsClients.java
+2023.04.03 15:09:27 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/aws/AwsClients.java
+2023.04.03 15:09:27 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/aws/AwsClients.java
+2023.04.03 15:09:27 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/aws/AwsClients.java
+2023.04.03 15:09:28 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/main/java/com/trustpilot/connector/dynamodb/aws/AwsClients.java
+2023.04.03 15:10:53 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/test/java/com/trustpilot/connector/dynamodb/KafkaConnectITBase.java
+2023.04.03 15:11:37 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/test/java/com/trustpilot/connector/dynamodb/KafkaConnectITBase.java
+2023.04.03 15:11:37 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/test/java/com/trustpilot/connector/dynamodb/KafkaConnectITBase.java
+2023.04.03 15:11:38 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/test/java/com/trustpilot/connector/dynamodb/KafkaConnectITBase.java
+2023.04.03 15:11:37 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/test/java/com/trustpilot/connector/dynamodb/KafkaConnectITBase.java
+2023.04.03 15:11:38 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/test/java/com/trustpilot/connector/dynamodb/KafkaConnectITBase.java
+2023.04.03 15:11:47 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/test/java/com/trustpilot/connector/dynamodb/KafkaConnectITBase.java
+2023.04.03 15:11:47 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/test/java/com/trustpilot/connector/dynamodb/KafkaConnectITBase.java
+2023.04.03 15:11:47 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/test/java/com/trustpilot/connector/dynamodb/KafkaConnectITBase.java
+2023.04.03 15:12:56 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/test/java/com/trustpilot/connector/dynamodb/aws/AwsClientsTests.java
+2023.04.03 15:13:24 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/test/java/com/trustpilot/connector/dynamodb/aws/AwsClientsTests.java
+2023.04.03 15:13:25 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/test/java/com/trustpilot/connector/dynamodb/aws/AwsClientsTests.java
+2023.04.03 15:13:25 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/test/java/com/trustpilot/connector/dynamodb/aws/AwsClientsTests.java
+2023.04.03 15:13:25 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/test/java/com/trustpilot/connector/dynamodb/aws/AwsClientsTests.java
+2023.04.03 15:13:52 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/test/java/com/trustpilot/connector/dynamodb/aws/AwsClientsTests.java
+2023.04.03 15:13:52 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/test/java/com/trustpilot/connector/dynamodb/aws/AwsClientsTests.java
+2023.04.03 15:13:52 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/test/java/com/trustpilot/connector/dynamodb/aws/AwsClientsTests.java
+2023.04.03 15:13:55 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/test/java/com/trustpilot/connector/dynamodb/aws/DynamoDBTableScannerTests.java
+2023.04.03 15:14:05 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/test/java/com/trustpilot/connector/dynamodb/aws/AwsClientsTests.java
+2023.04.03 15:14:05 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/test/java/com/trustpilot/connector/dynamodb/aws/AwsClientsTests.java
+2023.04.03 15:14:05 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/test/java/com/trustpilot/connector/dynamodb/aws/AwsClientsTests.java
+2023.04.03 15:14:05 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/test/java/com/trustpilot/connector/dynamodb/aws/AwsClientsTests.java
