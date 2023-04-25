@@ -17,6 +17,9 @@ public class DynamoDBSourceConnectorConfig extends AbstractConfig {
 	public static final String SRC_INIT_SYNC_DELAY_DISPLAY = "INIT_SYNC delay";
 	public static final int SRC_INIT_SYNC_DELAY_DEFAULT = 60;
 
+    // Coinbase
+    public static final boolean SRC_INIT_SYNC_DISABLED = false;
+
   	public static final String AWS_REGION_CONFIG = "aws.region";
 	public static final String AWS_REGION_DOC = "Define AWS region.";
 	public static final String AWS_REGION_DISPLAY = "Region";

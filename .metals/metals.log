@@ -383,3 +383,6 @@ package com.trustpilot.connector.dynamodb;
 2023.04.03 15:14:05 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/test/java/com/trustpilot/connector/dynamodb/aws/AwsClientsTests.java
 2023.04.03 15:14:05 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/test/java/com/trustpilot/connector/dynamodb/aws/AwsClientsTests.java
 2023.04.03 15:14:05 WARN  no build target for: /Users/xinyu.liu/src/kafka-connect-dynamodb/source/src/test/java/com/trustpilot/connector/dynamodb/aws/AwsClientsTests.java
+2023.04.04 09:23:26 INFO  Shutting down server
+2023.04.04 09:23:26 INFO  shutting down Metals
+2023.04.04 09:23:26 INFO  Exiting server
