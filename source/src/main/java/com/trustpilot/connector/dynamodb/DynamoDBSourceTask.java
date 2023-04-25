@@ -169,6 +169,7 @@ public class DynamoDBSourceTask extends SourceTask {
             sourceInfo = new SourceInfo(tableDesc.getTableName(), clock);            
             if (initSyncDisable) {
                 sourceInfo.endInitSync();
+                sourceInfo.initSync = false;
                 LOGGER.info("INIT_SYNC disabled, sourceInfo initSyncStatus={}, lastInitSyncStart={}, lastInitSyncEnd={}",  
                     sourceInfo.initSyncStatus,
                     sourceInfo.lastInitSyncStart,
