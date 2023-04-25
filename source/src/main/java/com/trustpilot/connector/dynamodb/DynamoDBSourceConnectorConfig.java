@@ -17,7 +17,6 @@ public class DynamoDBSourceConnectorConfig extends AbstractConfig {
 	public static final String SRC_INIT_SYNC_DELAY_DISPLAY = "INIT_SYNC delay";
 	public static final int SRC_INIT_SYNC_DELAY_DEFAULT = 60;
 
-    // Coinbase
     public static final String SRC_INIT_SYNC_DISABLE_CONFIG = "init.sync.disable";
     public static final String SRC_INIT_SYNC_DISABLE_DOC = "Disabling INIT_SYNC will start from TRIM_HORIZON - 24 hours old events";
 	public static final String SRC_INIT_SYNC_DISABLE_DISPLAY = "INIT_SYNC disable";
