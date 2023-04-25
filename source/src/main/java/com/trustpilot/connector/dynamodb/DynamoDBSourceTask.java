@@ -89,6 +89,7 @@ public class DynamoDBSourceTask extends SourceTask {
     private SourceInfo sourceInfo;
     private TableDescription tableDesc;
     private int initSyncDelay;
+    private boolean initSyncDisable;
 
     @SuppressWarnings("unused")
     //Used by Confluent platform to initialize connector
@@ -124,6 +125,7 @@ public class DynamoDBSourceTask extends SourceTask {
         tableDesc = client.describeTable(config.getTableName()).getTable();
 
         initSyncDelay = config.getInitSyncDelay();
+        initSyncDisable = config.getInitSyncDisable();
 
         LOGGER.debug("Getting offset for table: {}", tableDesc.getTableName());
         setStateFromOffset();
@@ -147,7 +149,7 @@ public class DynamoDBSourceTask extends SourceTask {
                 config.getAwsAssumeRoleArn());
 
         if (kclWorker == null) {
-            kclWorker = new KclWorkerImpl(
+            kclWorker = new KclWorkerImpl(  // always start from TRIM_HORIZON
                     AwsClients.getCredentials(config.getAwsAccessKeyIdValue(), config.getAwsSecretKeyValue(), config.getAwsAssumeRoleArn()),
                     eventsQueue,
                     shardRegister);
@@ -164,8 +166,22 @@ public class DynamoDBSourceTask extends SourceTask {
             sourceInfo = SourceInfo.fromOffset(offset, clock);
         } else {
             LOGGER.debug("No stored offset found for table: {}", tableDesc.getTableName());
-            sourceInfo = new SourceInfo(tableDesc.getTableName(), clock);
-            sourceInfo.startInitSync(); // InitSyncStatus always needs to run after adding new table
+            sourceInfo = new SourceInfo(tableDesc.getTableName(), clock);            
+            if (initSyncDisable) {
+                sourceInfo.endInitSync();
+                LOGGER.info("INIT_SYNC disabled, sourceInfo initSyncStatus={}, lastInitSyncStart={}, lastInitSyncEnd={}",  
+                    sourceInfo.initSyncStatus,
+                    sourceInfo.lastInitSyncStart,
+                    sourceInfo.lastInitSyncEnd
+                );
+            } else {
+                sourceInfo.startInitSync(); // InitSyncStatus always needs to run after adding new table
+                LOGGER.info("INIT_SYNC enabled, sourceInfo initSyncStatus={}, lastInitSyncStart={}, lastInitSyncEnd={}",  
+                    sourceInfo.initSyncStatus,
+                    sourceInfo.lastInitSyncStart,
+                    sourceInfo.lastInitSyncEnd
+                );
+            }
         }
     }
 
@@ -261,7 +277,6 @@ public class DynamoDBSourceTask extends SourceTask {
                                                 null));
         }
 
-
         if (sourceInfo.initSyncStatus == InitSyncStatus.RUNNING) {
             LOGGER.info(
                     "INIT_SYNC iteration returned {}. Status: {}", result.size(), sourceInfo);
@@ -317,7 +332,7 @@ public class DynamoDBSourceTask extends SourceTask {
                 // * connector was down for some time
                 // * connector is lagging
                 // * connector failed to finish init sync in acceptable time frame
-                if (recordIsInDangerZone(arrivalTimestamp)) {
+                if ( (!initSyncDisable) && recordIsInDangerZone(arrivalTimestamp)) {
                     sourceInfo.startInitSync();
 
                     LOGGER.info(

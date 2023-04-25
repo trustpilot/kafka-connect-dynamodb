@@ -18,7 +18,10 @@ public class DynamoDBSourceConnectorConfig extends AbstractConfig {
 	public static final int SRC_INIT_SYNC_DELAY_DEFAULT = 60;
 
     // Coinbase
-    public static final boolean SRC_INIT_SYNC_DISABLED = false;
+    public static final String SRC_INIT_SYNC_DISABLE_CONFIG = "init.sync.disable";
+    public static final String SRC_INIT_SYNC_DISABLE_DOC = "Disabling INIT_SYNC will start from TRIM_HORIZON - 24 hours old events";
+	public static final String SRC_INIT_SYNC_DISABLE_DISPLAY = "INIT_SYNC disable";
+	public static final boolean SRC_INIT_SYNC_DISABLE_DEFAULT = false;
 
   	public static final String AWS_REGION_CONFIG = "aws.region";
 	public static final String AWS_REGION_DOC = "Define AWS region.";
@@ -224,6 +227,15 @@ public class DynamoDBSourceConnectorConfig extends AbstractConfig {
 						CONNECTOR_GROUP, 4,
 						ConfigDef.Width.MEDIUM,
 						REDISCOVERY_PERIOD_DISPLAY)
+
+                .define(SRC_INIT_SYNC_DISABLE_CONFIG,
+						ConfigDef.Type.BOOLEAN,
+						SRC_INIT_SYNC_DISABLE_DEFAULT,
+						ConfigDef.Importance.HIGH,
+						SRC_INIT_SYNC_DISABLE_DOC,
+						CONNECTOR_GROUP, 3,
+						ConfigDef.Width.SHORT,
+						SRC_INIT_SYNC_DISABLE_DISPLAY)
 				;
 
 	}
@@ -274,6 +286,10 @@ public class DynamoDBSourceConnectorConfig extends AbstractConfig {
 		return (int)get(SRC_INIT_SYNC_DELAY_CONFIG);
 	}
 
+    public boolean getInitSyncDisable() {
+        return getBoolean(SRC_INIT_SYNC_DISABLE_CONFIG);
+    }
+
 	public String getDynamoDBServiceEndpoint() {
 		return getString(AWS_DYNAMODB_SERVICE_ENDPOINT_CONFIG);
 	}
@@ -293,4 +309,5 @@ public class DynamoDBSourceConnectorConfig extends AbstractConfig {
 	public String getAwsAssumeRoleArn() {
 		return getString(AWS_ASSUME_ROLE_ARN_CONFIG);
 	}
+
 }
