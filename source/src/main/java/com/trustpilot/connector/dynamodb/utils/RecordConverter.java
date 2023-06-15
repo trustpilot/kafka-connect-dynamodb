@@ -62,6 +62,7 @@ public class RecordConverter {
             SourceInfo sourceInfo,
             Envelope.Operation op,
             Map<String, AttributeValue> attributes,
+            Map<String, AttributeValue> oldImage,
             Instant arrivalTimestamp,
             String shardId,
             String sequenceNumber) throws Exception {
@@ -77,6 +78,7 @@ public class RecordConverter {
 
         // getUnmarshallItems from Dynamo Document
         Map<String, Object> unMarshalledItems = ItemUtils.toSimpleMapValue(attributes);
+        Map<String, Object> unMarshalledOldItems = ItemUtils.toSimpleMapValue(oldImage);
 
         // Leveraging offsets to store shard and sequence number with each item pushed to Kafka.
         // This info will only be used to update `shardRegister` and won't be used to reset state after restart
@@ -106,6 +108,7 @@ public class RecordConverter {
         Struct valueData = new Struct(valueSchema)
                 .put(Envelope.FieldName.VERSION, sourceInfo.version)
                 .put(Envelope.FieldName.DOCUMENT, objectMapper.writeValueAsString(unMarshalledItems))
+                .put(Envelope.FieldName.OLD_DOCUMENT, objectMapper.writeValueAsString(unMarshalledOldItems))
                 .put(Envelope.FieldName.SOURCE, SourceInfo.toStruct(sourceInfo))
                 .put(Envelope.FieldName.OPERATION, op.code())
                 .put(Envelope.FieldName.TIMESTAMP, arrivalTimestamp.toEpochMilli());
