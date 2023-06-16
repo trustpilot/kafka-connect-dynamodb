@@ -3,6 +3,7 @@ package com.trustpilot.connector.dynamodb.utils;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.KeySchemaElement;
 import com.amazonaws.services.dynamodbv2.model.TableDescription;
+import com.amazonaws.services.dynamodbv2.document.ItemUtils;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
@@ -45,12 +46,13 @@ public class RecordConverter {
 
     public RecordConverter(TableDescription tableDesc, String topicNamePrefix) {
         this.tableDesc = tableDesc;
-        this.topic_name = topicNamePrefix + tableDesc.getTableName();
+        this.topic_name = topicNamePrefix;
 
         valueSchema = SchemaBuilder.struct()
                                    .name(SchemaNameAdjuster.DEFAULT.adjust( "com.trustpilot.connector.dynamodb.envelope"))
                                    .field(Envelope.FieldName.VERSION, Schema.STRING_SCHEMA)
                                    .field(Envelope.FieldName.DOCUMENT, DynamoDbJson.schema())
+                                    .field(Envelope.FieldName.OLD_DOCUMENT, DynamoDbJson.schema())
                                    .field(Envelope.FieldName.SOURCE, SourceInfo.structSchema())
                                    .field(Envelope.FieldName.OPERATION, Schema.STRING_SCHEMA)
                                    .field(Envelope.FieldName.TIMESTAMP, Schema.INT64_SCHEMA)
@@ -61,6 +63,7 @@ public class RecordConverter {
             SourceInfo sourceInfo,
             Envelope.Operation op,
             Map<String, AttributeValue> attributes,
+            Map<String, AttributeValue> oldImage,
             Instant arrivalTimestamp,
             String shardId,
             String sequenceNumber) throws Exception {
@@ -73,6 +76,10 @@ public class RecordConverter {
                         (u, v) -> u,
                         LinkedHashMap::new
                 ));
+
+        // getUnmarshallItems from Dynamo Document
+        Map<String, Object> unMarshalledItems = ItemUtils.toSimpleMapValue(attributes);
+        Map<String, Object> unMarshalledOldItems = ItemUtils.toSimpleMapValue(oldImage);
 
         // Leveraging offsets to store shard and sequence number with each item pushed to Kafka.
         // This info will only be used to update `shardRegister` and won't be used to reset state after restart
@@ -101,7 +108,8 @@ public class RecordConverter {
 
         Struct valueData = new Struct(valueSchema)
                 .put(Envelope.FieldName.VERSION, sourceInfo.version)
-                .put(Envelope.FieldName.DOCUMENT, objectMapper.writeValueAsString(sanitisedAttributes))
+                .put(Envelope.FieldName.DOCUMENT, objectMapper.writeValueAsString(unMarshalledItems))
+                .put(Envelope.FieldName.OLD_DOCUMENT, objectMapper.writeValueAsString(unMarshalledOldItems))
                 .put(Envelope.FieldName.SOURCE, SourceInfo.toStruct(sourceInfo))
                 .put(Envelope.FieldName.OPERATION, op.code())
                 .put(Envelope.FieldName.TIMESTAMP, arrivalTimestamp.toEpochMilli());

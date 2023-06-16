@@ -20,6 +20,8 @@ task userWrapper(type: Wrapper) {
 
 description = "kafka-connect-dynamodb"
 
+shadowJar.archiveName = "${project.name}.jar"
+
 allprojects {
     group "com.trustpilot.kafka.connect.dynamodb"
     version = gitVersion()

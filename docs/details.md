@@ -13,6 +13,8 @@ This connector can sync multiple DynamoDB tables at the same time and it does so
 
 `INIT_SYNC` is a process when all existing table data is scanned and pushed into Kafka destination topic. Usually this happens only once after source task for specific table is started for the first time. But it can be repeated in case of unexpected issues, e.g. if source connector was down for long period of time and it is possible that it has missed some of the change events from the table stream (DynamoDB streams store data for 24 hours only). 
 
+Using `init.sync.skip` will skip this process and the connector will only ever read from the LATEST position in the stream.
+
 ### 3. "SYNC"
 
 Once `INIT_SYNC` is finished source task switches into DynamoDB Streams consumer state. There all changes that happen to the source table are represented in this stream and copied over to the Kafka's destination topic. Consumers of this topic can recreate full state of the source table at any given time.

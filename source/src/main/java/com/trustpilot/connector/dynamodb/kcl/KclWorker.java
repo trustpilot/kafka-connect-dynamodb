@@ -10,6 +10,7 @@ public interface KclWorker {
                String tableName,
                String taskid,
                String endpoint,
+               Boolean isSkipSync,
                BillingMode kclTablebillingMode);
 
     void stop();

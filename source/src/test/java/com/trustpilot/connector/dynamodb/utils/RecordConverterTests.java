@@ -82,13 +82,14 @@ public class RecordConverterTests {
                 getSourceInfo(table),
                 Envelope.Operation.forCode("r"),
                 getAttributes(),
+                getAttributes(),
                 Instant.parse("2001-01-02T00:00:00.00Z"),
                 "testShardID1",
                 "testSequenceNumberID1"
         );
 
         // Assert
-        assertEquals("TestTopicPrefix-TestTable1", record.topic());
+        assertEquals("TestTopicPrefix-", record.topic());
     }
 
     @Test
@@ -100,6 +101,7 @@ public class RecordConverterTests {
         SourceRecord record = converter.toSourceRecord(
                 getSourceInfo(table),
                 Envelope.Operation.forCode("r"),
+                getAttributes(),
                 getAttributes(),
                 Instant.parse("2001-01-02T00:00:00.00Z"),
                 "testShardID1",
@@ -119,6 +121,7 @@ public class RecordConverterTests {
         SourceRecord record = converter.toSourceRecord(
                 getSourceInfo(table),
                 Envelope.Operation.forCode("r"),
+                getAttributes(),
                 getAttributes(),
                 Instant.parse("2001-01-02T00:00:00.00Z"),
                 "testShardID1",
@@ -142,6 +145,7 @@ public class RecordConverterTests {
         SourceRecord record = converter.toSourceRecord(
                 getSourceInfo(table),
                 Envelope.Operation.forCode("r"),
+                getAttributes(),
                 getAttributes(),
                 Instant.parse("2001-01-02T00:00:00.00Z"),
                 "testShardID1",
@@ -168,6 +172,7 @@ public class RecordConverterTests {
                 getSourceInfo(table),
                 Envelope.Operation.forCode("r"),
                 getAttributes(),
+                getAttributes(),
                 Instant.parse("2001-01-02T00:00:00.00Z"),
                 "testShardID1",
                 "testSequenceNumberID1"
@@ -193,13 +198,14 @@ public class RecordConverterTests {
                 getSourceInfo(table),
                 Envelope.Operation.forCode("r"),
                 getAttributes(),
+                getAttributes(),
                 Instant.parse("2001-01-02T00:00:00.00Z"),
                 "testShardID1",
                 "testSequenceNumberID1"
         );
 
         // Assert
-        assertEquals("{\"testKV1\":{\"s\":\"testKV1Value\"},\"testKV2\":{\"s\":\"2\"},\"testV2\":{\"s\":\"testStringValue\"},\"testV1\":{\"n\":\"1\"}}",
+        assertEquals("{\"testKV1\":\"testKV1Value\",\"testKV2\":\"2\",\"testV2\":\"testStringValue\",\"testV1\":1}",
                      ((Struct) record.value()).getString("document"));
     }
 
@@ -215,6 +221,7 @@ public class RecordConverterTests {
         SourceRecord record = converter.toSourceRecord(
                 getSourceInfo(table),
                 Envelope.Operation.forCode("r"),
+                getAttributesWithInvalidAvroCharacters(),
                 getAttributesWithInvalidAvroCharacters(),
                 Instant.parse("2001-01-02T00:00:00.00Z"),
                 "testShardID1",
@@ -241,6 +248,7 @@ public class RecordConverterTests {
                 getSourceInfo(table),
                 Envelope.Operation.forCode("r"),
                 getAttributesWithInvalidAvroCharacters(),
+                getAttributesWithInvalidAvroCharacters(),
                 Instant.parse("2001-01-02T00:00:00.00Z"),
                 "testShardID1",
                 "testSequenceNumberID1"
@@ -266,12 +274,13 @@ public class RecordConverterTests {
                 getSourceInfo(table),
                 Envelope.Operation.forCode("r"),
                 getAttributesWithInvalidAvroCharacters(),
+                getAttributesWithInvalidAvroCharacters(),
                 Instant.parse("2001-01-02T00:00:00.00Z"),
                 "testShardID1",
                 "testSequenceNumberID1"
         );
 
-        String expected = "{\"test1234\":{\"s\":\"testKV1Value\"},\"_starts_with_underscore\":{\"n\":\"1\"},\"startswithnumber\":{\"s\":\"2\"},\"test\":{\"s\":\"testStringValue\"}}";
+        String expected = "{\"test-1234\":\"testKV1Value\",\"_starts_with_underscore\":1,\"1-starts-with-number\":\"2\",\"test!@£$%^\":\"testStringValue\"}";
 
         // Assert
         assertEquals(expected,
@@ -287,6 +296,7 @@ public class RecordConverterTests {
         SourceRecord record = converter.toSourceRecord(
                 getSourceInfo(table),
                 Envelope.Operation.forCode("r"),
+                getAttributes(),
                 getAttributes(),
                 Instant.parse("2001-01-02T00:00:00.00Z"),
                 "testShardID1",
@@ -310,6 +320,7 @@ public class RecordConverterTests {
                 getSourceInfo(table),
                 Envelope.Operation.forCode("r"),
                 getAttributes(),
+                getAttributes(),
                 Instant.parse("2001-01-02T00:00:00.00Z"),
                 "testShardID1",
                 "testSequenceNumberID1"
@@ -328,6 +339,7 @@ public class RecordConverterTests {
         SourceRecord record = converter.toSourceRecord(
                 getSourceInfo(table),
                 Envelope.Operation.forCode("r"),
+                getAttributes(),
                 getAttributes(),
                 Instant.parse("2001-01-02T00:00:00.00Z"),
                 "testShardID1",

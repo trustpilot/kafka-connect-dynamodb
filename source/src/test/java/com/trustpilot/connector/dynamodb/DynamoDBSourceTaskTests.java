@@ -29,7 +29,6 @@ import static org.mockito.Mockito.*;
 @SuppressWarnings("ConstantConditions")
 public class DynamoDBSourceTaskTests {
     private final static String tableName = "testTable1";
-
     private HashMap<String, String> configs;
 
     @BeforeEach
@@ -208,6 +207,7 @@ public class DynamoDBSourceTaskTests {
                 eq(tableName),
                 eq("testTask1"),
                 eq(null),
+                eq(false),
                 eq(BillingMode.PROVISIONED)
         );
     }
@@ -278,7 +278,7 @@ public class DynamoDBSourceTaskTests {
 
         assertEquals(1, response.size());
         assertEquals("r", ((Struct) response.get(0).value()).getString("op"));
-        assertEquals("{\"col2\":{\"s\":\"val1\"},\"col3\":{\"n\":\"1\"},\"col1\":{\"s\":\"key1\"}}", ((Struct) response.get(0).value()).getString("document"));
+        assertEquals(("{\"col2\":\"val1\",\"col3\":1,\"col1\":\"key1\"}"), ((Struct) response.get(0).value()).getString("document"));
         assertEquals(InitSyncStatus.RUNNING, task.getSourceInfo().initSyncStatus);
         assertEquals(exclusiveStartKey, task.getSourceInfo().exclusiveStartKey);
     }
@@ -560,8 +560,8 @@ public class DynamoDBSourceTaskTests {
 
         // Assert
         assertEquals(3, response.size());
-        assertEquals("{\"col2\":{\"s\":\"val1\"},\"col3\":{\"n\":\"1\"},\"col1\":{\"s\":\"key1\"}}", ((Struct) response.get(0).value()).getString("document"));
-        assertEquals("{\"col1\":{\"s\":\"key2\"}}", ((Struct) response.get(1).value()).getString("document"));
+        assertEquals("{\"col2\":\"val1\",\"col3\":1,\"col1\":\"key1\"}", ((Struct) response.get(0).value()).getString("document"));
+        assertEquals("{\"col1\":\"key2\"}", ((Struct) response.get(1).value()).getString("document"));
         assertNull(response.get(2).value());  // tombstone
     }
 
@@ -875,4 +875,197 @@ public class DynamoDBSourceTaskTests {
         assertEquals("", shardRegister.get("shard1").getLastCommittedRecordSeqNo());
     }
 
+    @Test
+    public void initSyncIsSkippedWithNoOffsetOnStart() throws InterruptedException {
+        configs.put("init.sync.skip", "true");
+        // Arrange
+        DynamoDBSourceTask task = new SourceTaskBuilder()
+                .withOffset(null)
+                .buildTask();
+
+        // Act
+        task.start(configs);
+
+        // Assert
+        SourceInfo sourceInfo = task.getSourceInfo();
+        assertEquals(tableName, sourceInfo.tableName);
+        assertEquals(InitSyncStatus.SKIPPED, sourceInfo.initSyncStatus);
+        assertEquals(Instant.parse("1970-01-01T00:00:00Z"), sourceInfo.lastInitSyncStart);
+        assertEquals(Instant.parse("1970-01-01T00:00:00Z"), sourceInfo.lastInitSyncEnd);
+    }
+
+    @Test
+    public void sourceInfoOfSkippedInitSyncIsLoadedFromOffsetOnStart() throws InterruptedException {
+        configs.put("init.sync.skip", "true");
+        // Arrange
+        HashMap<String, Object> offset = new HashMap<>();
+        offset.put("table_name", tableName);
+        offset.put("init_sync_state", "SKIPPED");
+        offset.put("init_sync_start", Instant.parse("1970-01-01T00:00:00Z").toEpochMilli());
+
+        DynamoDBSourceTask task = new SourceTaskBuilder()
+                .withOffset(offset)
+                .buildTask();
+
+        // Act
+        task.start(configs);
+
+        // Assert
+        SourceInfo sourceInfo = task.getSourceInfo();
+        assertEquals(tableName, sourceInfo.tableName);
+        assertEquals(InitSyncStatus.SKIPPED, sourceInfo.initSyncStatus);
+        assertEquals(Instant.parse("1970-01-01T00:00:00Z"), sourceInfo.lastInitSyncStart);
+        assertEquals(Instant.parse("1970-01-01T00:00:00Z"), sourceInfo.lastInitSyncEnd);
+    }
+
+    @Test
+    public void skippedInitSyncOnSyncPollReturnsReceivedRecords() throws InterruptedException {
+        // Arrange
+        configs.put("init.sync.skip", "true");
+
+        HashMap<String, Object> offset = new HashMap<>();
+        offset.put("table_name", tableName);
+        offset.put("init_sync_state", "SKIPPED");
+        offset.put("init_sync_start", Instant.parse("2001-01-01T00:00:00.00Z").toEpochMilli());
+
+        KclRecordsWrapper dynamoDBRecords = new KclRecordsWrapper("testShardId1", new LinkedList<>());
+
+        TableDescription tableDescription = new TableDescription();
+        tableDescription.setTableName(tableName);
+        tableDescription.setKeySchema(Collections.singleton(new KeySchemaElement("col1", "S")));
+
+        Map<String, AttributeValue> row = new HashMap<>();
+        row.put("col1", new AttributeValue("key1"));
+        row.put("col2", new AttributeValue("val1"));
+        row.put("col3", new AttributeValue().withN("1"));
+        List<Map<String, AttributeValue>> initSyncRecords = Collections.singletonList(row);
+
+        Map<String, AttributeValue> exclusiveStartKey = Collections.singletonMap("fake", new AttributeValue("key"));
+
+        dynamoDBRecords.getRecords().add(
+                getRecordAdapter(Collections.singletonMap("col1", new AttributeValue().withS("key1")),
+                        row, Instant.parse("2001-01-01T01:00:00.00Z"),
+                        "1000000001",
+                        "INSERT"));
+        dynamoDBRecords.getRecords().add(
+                getRecordAdapter(Collections.singletonMap("col1", new AttributeValue().withS("key2")),
+                        null, Instant.parse("2001-01-01T01:00:00.00Z"),
+                        "1000000002",
+                        "REMOVE"));
+        dynamoDBRecords.getRecords().add(
+                getRecordAdapter(Collections.singletonMap("col1", new AttributeValue().withS("key1")),
+                        row, Instant.parse("2001-01-01T01:00:00.00Z"),
+                        "1000000003",
+                        "INSERT"));
+
+        DynamoDBSourceTask task = new SourceTaskBuilder()
+                .withOffset(offset)
+                .withTableDescription(tableDescription)
+                .withInitSyncRecords(initSyncRecords, exclusiveStartKey)
+                .withSyncRecords(Collections.singletonList(dynamoDBRecords))
+                .buildTask();
+
+        // Act
+        task.start(configs);
+        List<SourceRecord> response = task.poll();
+
+        // Assert
+        assertEquals(4, response.size());
+        assertEquals("{\"col2\":\"val1\",\"col3\":1,\"col1\":\"key1\"}", ((Struct) response.get(0).value()).getString("document"));
+        assertEquals("{\"col1\":\"key2\"}", ((Struct) response.get(1).value()).getString("document"));
+        assertNull(response.get(2).value());  // tombstone
+    }
+    @Test
+    public void onStartInitSyncSkipIsNotDelayed() throws InterruptedException {
+        // Arrange
+        configs.put("init.sync.skip", "true");
+        configs.put("init.sync.delay.period", "2");
+
+        HashMap<String, Object> offset = new HashMap<>();
+        offset.put("table_name", tableName);
+        offset.put("init_sync_state", "SKIPPED");
+        offset.put("init_sync_start", Instant.parse("2001-01-01T00:00:00.00Z").toEpochMilli());
+
+        KclRecordsWrapper dynamoDBRecords = new KclRecordsWrapper("testShardId1", new LinkedList<>());
+
+        TableDescription tableDescription = new TableDescription();
+        tableDescription.setTableName(tableName);
+        tableDescription.setKeySchema(Collections.singleton(new KeySchemaElement("col1", "S")));
+
+        Map<String, AttributeValue> row = new HashMap<>();
+        row.put("col1", new AttributeValue("key1"));
+        List<Map<String, AttributeValue>> initSyncRecords = Collections.singletonList(row);
+
+        dynamoDBRecords.getRecords().add(
+                getRecordAdapter(Collections.singletonMap("col1", new AttributeValue().withS("key1")),
+                        row, Instant.parse("2001-01-01T01:01:00.00Z"),
+                        "1000000001",
+                        "INSERT"));
+
+        DynamoDBSourceTask task = new SourceTaskBuilder()
+                .withOffset(offset)
+                .withClock(Clock.fixed(Instant.parse("2001-01-01T01:00:00.00Z"), ZoneId.of("UTC")))
+                .withTableDescription(tableDescription)
+                .withInitSyncRecords(initSyncRecords, null)
+                .withSyncRecords(Collections.singletonList(dynamoDBRecords))
+                .buildTask();
+
+        // Act
+        task.start(configs);
+        Instant start = Instant.now();
+        List<SourceRecord> response = task.poll();
+        Instant stop = Instant.now();
+
+        // Assert
+        assertTrue(Duration.between(start, stop).getSeconds() == 0);
+        assertEquals(0, task.getSourceInfo().initSyncCount);
+        assertEquals(1, response.size());
+    }
+
+    @Test
+    public void onSyncPollInitSyncSkipReturnsNullAndDoesNotStartInitSyncIfAnyOneRecordEventArrivedTooLate() throws InterruptedException {
+        // Arrange
+        configs.put("init.sync.skip", "true");
+
+        HashMap<String, Object> offset = new HashMap<>();
+        offset.put("table_name", tableName);
+        offset.put("init_sync_state", "SKIPPED");
+        offset.put("init_sync_start", Instant.parse("2001-01-01T00:00:00.00Z").toEpochMilli());
+
+        KclRecordsWrapper dynamoDBRecords = new KclRecordsWrapper("testShardId1", new LinkedList<>());
+
+        TableDescription tableDescription = new TableDescription();
+        tableDescription.setTableName(tableName);
+        tableDescription.setKeySchema(Collections.singleton(new KeySchemaElement("col1", "S")));
+
+        Map<String, AttributeValue> row = new HashMap<>();
+        row.put("col1", new AttributeValue("key1"));
+        row.put("col2", new AttributeValue("val1"));
+        row.put("col3", new AttributeValue().withN("1"));
+        List<Map<String, AttributeValue>> initSyncRecords = Collections.singletonList(row);
+
+        Map<String, AttributeValue> exclusiveStartKey = Collections.singletonMap("fake", new AttributeValue("key"));
+
+        dynamoDBRecords.getRecords().add(getRecordAdapter(Collections.singletonMap("col1", new AttributeValue().withN("key1")),
+                row, Instant.parse("2001-01-03T15:00:00.00Z"), "s1", "INSERT"));
+        dynamoDBRecords.getRecords().add(getRecordAdapter(Collections.singletonMap("col1", new AttributeValue().withN("key1")),
+                row, Instant.parse("2001-01-03T00:00:00.00Z"), "s2", "INSERT"));
+
+        DynamoDBSourceTask task = new SourceTaskBuilder()
+                .withOffset(offset)
+                .withClock(Clock.fixed(Instant.parse("2001-01-03T20:00:00.00Z"), ZoneId.of("UTC")))
+                .withTableDescription(tableDescription)
+                .withInitSyncRecords(initSyncRecords, exclusiveStartKey)
+                .withSyncRecords(Collections.singletonList(dynamoDBRecords))
+                .buildTask();
+
+        // Act
+        task.start(configs);
+        List<SourceRecord> response = task.poll();
+
+        // Assert
+        assertEquals(2, response.size());
+        assertEquals(0, task.getSourceInfo().initSyncCount);
+        assertEquals(InitSyncStatus.SKIPPED, task.getSourceInfo().initSyncStatus);
+    }
 }
