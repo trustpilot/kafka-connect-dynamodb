@@ -109,10 +109,15 @@ public class RecordConverter {
         Struct valueData = new Struct(valueSchema)
                 .put(Envelope.FieldName.VERSION, sourceInfo.version)
                 .put(Envelope.FieldName.DOCUMENT, objectMapper.writeValueAsString(unMarshalledItems))
-                .put(Envelope.FieldName.OLD_DOCUMENT, objectMapper.writeValueAsString(unMarshalledOldItems))
                 .put(Envelope.FieldName.SOURCE, SourceInfo.toStruct(sourceInfo))
                 .put(Envelope.FieldName.OPERATION, op.code())
                 .put(Envelope.FieldName.TIMESTAMP, arrivalTimestamp.toEpochMilli());
+
+        if (unMarshalledOldItems == null) {
+            valueData.put(Envelope.FieldName.OLD_DOCUMENT, null);
+        } else {
+            valueData.put(Envelope.FieldName.OLD_DOCUMENT, objectMapper.writeValueAsString(unMarshalledOldItems));
+        }
 
         return new SourceRecord(
                 Collections.singletonMap("table_name", sourceInfo.tableName),
