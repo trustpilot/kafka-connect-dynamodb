@@ -59,7 +59,7 @@ public final class Envelope {
         /**
          * The {@code oldDocument} field is used to store the state of a record before an operation.
          */
-        public static final String OLD_DOCUMENT = "oldDocument";
+        public static final String OLD_DOCUMENT = "old_document";
         /**
          * The {@code op} field is used to store the kind of operation on a record.
          */
