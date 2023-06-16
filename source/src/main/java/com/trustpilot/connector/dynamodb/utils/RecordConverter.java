@@ -52,7 +52,7 @@ public class RecordConverter {
                                    .name(SchemaNameAdjuster.DEFAULT.adjust( "com.trustpilot.connector.dynamodb.envelope"))
                                    .field(Envelope.FieldName.VERSION, Schema.STRING_SCHEMA)
                                    .field(Envelope.FieldName.DOCUMENT, DynamoDbJson.schema())
-                                    .field(Envelope.FieldName.OLD_DOCUMENT, DynamoDbJson.schema())
+                                    .field(Envelope.FieldName.OLD_DOCUMENT, DynamoDbJson.builder().optional().build())
                                    .field(Envelope.FieldName.SOURCE, SourceInfo.structSchema())
                                    .field(Envelope.FieldName.OPERATION, Schema.STRING_SCHEMA)
                                    .field(Envelope.FieldName.TIMESTAMP, Schema.INT64_SCHEMA)
