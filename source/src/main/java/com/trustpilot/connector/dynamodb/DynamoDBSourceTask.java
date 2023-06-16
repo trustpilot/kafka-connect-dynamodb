@@ -257,6 +257,7 @@ public class DynamoDBSourceTask extends SourceTask {
             result.add(converter.toSourceRecord(sourceInfo,
                                                 Envelope.Operation.READ,
                                                 record,
+                                                null,
                                                 sourceInfo.lastInitSyncStart,
                                                 null,
                                                 null));
@@ -275,6 +276,7 @@ public class DynamoDBSourceTask extends SourceTask {
             result.add(converter.toSourceRecord(sourceInfo,
                                                 Envelope.Operation.READ,
                                                 lastRecord,
+                                                null,
                                                 sourceInfo.lastInitSyncStart,
                                                 null,
                                                 null));
@@ -364,9 +366,12 @@ public class DynamoDBSourceTask extends SourceTask {
                     attributes = dynamoDbRecord.getDynamodb().getKeys();
                 }
 
+                Map<String, AttributeValue> oldImage = dynamoDbRecord.getDynamodb().getOldImage();
+
                 SourceRecord sourceRecord = converter.toSourceRecord(sourceInfo,
                                                                      op,
                                                                      attributes,
+                                                                     oldImage,
                                                                      arrivalTimestamp.toInstant(),
                                                                      dynamoDBRecords.getShardId(),
                                                                      record.getSequenceNumber());

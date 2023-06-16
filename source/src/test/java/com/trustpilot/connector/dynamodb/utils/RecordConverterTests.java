@@ -82,6 +82,7 @@ public class RecordConverterTests {
                 getSourceInfo(table),
                 Envelope.Operation.forCode("r"),
                 getAttributes(),
+                getAttributes(),
                 Instant.parse("2001-01-02T00:00:00.00Z"),
                 "testShardID1",
                 "testSequenceNumberID1"
@@ -101,6 +102,7 @@ public class RecordConverterTests {
                 getSourceInfo(table),
                 Envelope.Operation.forCode("r"),
                 getAttributes(),
+                getAttributes(),
                 Instant.parse("2001-01-02T00:00:00.00Z"),
                 "testShardID1",
                 "testSequenceNumberID1"
@@ -119,6 +121,7 @@ public class RecordConverterTests {
         SourceRecord record = converter.toSourceRecord(
                 getSourceInfo(table),
                 Envelope.Operation.forCode("r"),
+                getAttributes(),
                 getAttributes(),
                 Instant.parse("2001-01-02T00:00:00.00Z"),
                 "testShardID1",
@@ -142,6 +145,7 @@ public class RecordConverterTests {
         SourceRecord record = converter.toSourceRecord(
                 getSourceInfo(table),
                 Envelope.Operation.forCode("r"),
+                getAttributes(),
                 getAttributes(),
                 Instant.parse("2001-01-02T00:00:00.00Z"),
                 "testShardID1",
@@ -168,6 +172,7 @@ public class RecordConverterTests {
                 getSourceInfo(table),
                 Envelope.Operation.forCode("r"),
                 getAttributes(),
+                getAttributes(),
                 Instant.parse("2001-01-02T00:00:00.00Z"),
                 "testShardID1",
                 "testSequenceNumberID1"
@@ -193,6 +198,7 @@ public class RecordConverterTests {
                 getSourceInfo(table),
                 Envelope.Operation.forCode("r"),
                 getAttributes(),
+                getAttributes(),
                 Instant.parse("2001-01-02T00:00:00.00Z"),
                 "testShardID1",
                 "testSequenceNumberID1"
@@ -215,6 +221,7 @@ public class RecordConverterTests {
         SourceRecord record = converter.toSourceRecord(
                 getSourceInfo(table),
                 Envelope.Operation.forCode("r"),
+                getAttributesWithInvalidAvroCharacters(),
                 getAttributesWithInvalidAvroCharacters(),
                 Instant.parse("2001-01-02T00:00:00.00Z"),
                 "testShardID1",
@@ -241,6 +248,7 @@ public class RecordConverterTests {
                 getSourceInfo(table),
                 Envelope.Operation.forCode("r"),
                 getAttributesWithInvalidAvroCharacters(),
+                getAttributesWithInvalidAvroCharacters(),
                 Instant.parse("2001-01-02T00:00:00.00Z"),
                 "testShardID1",
                 "testSequenceNumberID1"
@@ -266,6 +274,7 @@ public class RecordConverterTests {
                 getSourceInfo(table),
                 Envelope.Operation.forCode("r"),
                 getAttributesWithInvalidAvroCharacters(),
+                getAttributesWithInvalidAvroCharacters(),
                 Instant.parse("2001-01-02T00:00:00.00Z"),
                 "testShardID1",
                 "testSequenceNumberID1"
@@ -287,6 +296,7 @@ public class RecordConverterTests {
         SourceRecord record = converter.toSourceRecord(
                 getSourceInfo(table),
                 Envelope.Operation.forCode("r"),
+                getAttributes(),
                 getAttributes(),
                 Instant.parse("2001-01-02T00:00:00.00Z"),
                 "testShardID1",
@@ -310,6 +320,7 @@ public class RecordConverterTests {
                 getSourceInfo(table),
                 Envelope.Operation.forCode("r"),
                 getAttributes(),
+                getAttributes(),
                 Instant.parse("2001-01-02T00:00:00.00Z"),
                 "testShardID1",
                 "testSequenceNumberID1"
@@ -328,6 +339,7 @@ public class RecordConverterTests {
         SourceRecord record = converter.toSourceRecord(
                 getSourceInfo(table),
                 Envelope.Operation.forCode("r"),
+                getAttributes(),
                 getAttributes(),
                 Instant.parse("2001-01-02T00:00:00.00Z"),
                 "testShardID1",
