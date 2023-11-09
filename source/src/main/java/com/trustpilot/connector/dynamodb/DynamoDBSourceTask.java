@@ -414,6 +414,13 @@ public class DynamoDBSourceTask extends SourceTask {
         ShardInfo shardInfo = shardRegister.get(shardId);
         String currentSeqNo = shardInfo.getLastCommittedRecordSeqNo();
 
+        // shardInfo could be null if the AWS KCL lib has removed it from the registry
+        if (shardInfo == null) {
+            LOGGER.info("Skipping commitRecord: ShardID: {} lastPushedSequenceNumber: {}" +
+                    " because shardId is not present any longer in the shardRegister", shardId, sequenceNumber);
+            return;
+        }
+
         // Prevent issues with out of order registration.
         // Since we "commit" some records before sending to Kafka(and them being committed) in some cases.
         if (currentSeqNo != null && !currentSeqNo.equals("")) {
