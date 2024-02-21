@@ -56,7 +56,7 @@ In our implementation we opted to use Amazon Kinesis Client with DynamoDB Stream
                 "dynamodb:DescribeTable",
                 "dynamodb:DescribeStream",
                 "dynamodb:ListTagsOfResource",
-                "dynamodb:DescribeLimits"
+                "dynamodb:DescribeLimits",
                 "dynamodb:GetRecords",
                 "dynamodb:GetShardIterator", 
                 "dynamodb:Scan"
