@@ -4,6 +4,7 @@ import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.KeySchemaElement;
 import com.amazonaws.services.dynamodbv2.model.TableDescription;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import com.trustpilot.connector.dynamodb.Envelope;
@@ -21,6 +22,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
+
+import java.io.IOException;
 
 /**
  * Takes in KCL event attributes and converts into Kafka Connect Source record.
@@ -44,8 +47,12 @@ public class RecordConverter {
     private List<String> keys;
 
     public RecordConverter(TableDescription tableDesc, String topicNamePrefix) {
+        this(tableDesc, topicNamePrefix, null);
+    }
+
+    public RecordConverter(TableDescription tableDesc, String topicNamePrefix, String topicNamespaceMap) {
         this.tableDesc = tableDesc;
-        this.topic_name = topicNamePrefix + tableDesc.getTableName();
+        this.topic_name = topicNamePrefix + this.getTopicNameSuffix(topicNamespaceMap, tableDesc.getTableName());
 
         valueSchema = SchemaBuilder.struct()
                                    .name(SchemaNameAdjuster.DEFAULT.adjust( "com.trustpilot.connector.dynamodb.envelope"))
@@ -113,6 +120,26 @@ public class RecordConverter {
                 keySchema, keyData,
                 valueSchema, valueData
         );
+    }
+
+    private String getTopicNameSuffix(String topicNamespaceMap, String tableName) {
+        if (Strings.isNullOrEmpty(topicNamespaceMap)) {
+            return tableName;
+        }
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            LinkedHashMap<String, Object> map = objectMapper.readValue(topicNamespaceMap, new TypeReference<LinkedHashMap<String, Object>>() {});
+
+            if (map.containsKey(tableName)) {
+                return (String) map.get(tableName);
+            }
+            
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Invalid topicNamespaceMap: " + topicNamespaceMap);
+        }
+
+        return tableName;
     }
 
     private Schema getKeySchema(List<String> keys) {

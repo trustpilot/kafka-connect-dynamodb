@@ -92,6 +92,25 @@ public class RecordConverterTests {
     }
 
     @Test
+    public void correctTopicNameIsConstructedWithTopicNamespaceMapExact() throws Exception {
+        // Arrange
+        RecordConverter converter = new RecordConverter(getTableDescription(null), "TestTopicPrefix-", "{\"TestTable1\":\"TestTopic1\"}");
+
+        // Act
+        SourceRecord record = converter.toSourceRecord(
+                getSourceInfo(table),
+                Envelope.Operation.forCode("r"),
+                getAttributes(),
+                Instant.parse("2001-01-02T00:00:00.00Z"),
+                "testShardID1",
+                "testSequenceNumberID1"
+        );
+
+        // Assert
+        assertEquals("TestTopicPrefix-TestTopic1", record.topic()); 
+    }
+
+    @Test
     public void sourceInfoIsPutToOffset() throws Exception {
         // Arrange
         RecordConverter converter = new RecordConverter(getTableDescription(null), "TestTopicPrefix-");

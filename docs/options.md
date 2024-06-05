@@ -32,6 +32,7 @@
     "resource.tagging.service.endpoint": "",
     
     "kafka.topic.prefix": "dynamodb-",
+    "kafka.topic.map": "",
     "tasks.max": "1",
 
     "init.sync.delay.period": 60,
@@ -44,7 +45,9 @@
 
 `dynamodb.table.ingestion.tag.key` - only tables marked with this tag key will be ingested.
 
-`kafka.topic.prefix` - all topics created by this connector will have this prefix in their name. Following this pattern `{prefix}-{dynamodb-table-name}`
+`kafka.topic.prefix` - all topics created by this connector will have this prefix in their name. Following this pattern `{prefix}{dynamodb-table-name}`
+
+`kafka.topic.map` - A JSON mapping between dynamodb table name and topic name. The topics will be named like `{prefix}{map[table-name]}`. If the map is not specified, the table name will be used.
 
 `tasks.max` - **MUST** always exceed number of tables found for tracking. If max tasks count is lower then found tables count, no tasks will be started!
 

@@ -134,7 +134,7 @@ public class DynamoDBSourceTask extends SourceTask {
                     tableDesc.getTableName(),
                     tableDesc.getProvisionedThroughput().getReadCapacityUnits());
         }
-        converter = new RecordConverter(tableDesc, config.getDestinationTopicPrefix());
+        converter = new RecordConverter(tableDesc, config.getDestinationTopicPrefix(), config.getDestinationTopicNamespaceMap());
 
         LOGGER.info("Starting background KCL worker thread for table: {}", tableDesc.getTableName());
 
