@@ -334,6 +334,7 @@ public class DynamoDBSourceTask extends SourceTask {
                         ((RecordAdapter) record).getInternalObject();
 
                 Envelope.Operation op = getOperation(dynamoDbRecord.getEventName());
+                String eventId = dynamoDbRecord.getEventID();
 
                 Map<String, AttributeValue> attributes;
                 if (dynamoDbRecord.getDynamodb().getNewImage() != null) {
@@ -344,7 +345,9 @@ public class DynamoDBSourceTask extends SourceTask {
 
                 SourceRecord sourceRecord = converter.toSourceRecord(sourceInfo,
                                                                      op,
+                                                                     eventId,
                                                                      attributes,
+                                                                     dynamoDbRecord.getDynamodb().getOldImage(),
                                                                      arrivalTimestamp.toInstant(),
                                                                      dynamoDBRecords.getShardId(),
                                                                      record.getSequenceNumber());

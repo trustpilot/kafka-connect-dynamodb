@@ -57,9 +57,17 @@ public final class Envelope {
          */
         public static final String DOCUMENT = "document";
         /**
+         * The {@code before} field is used to store the state of a record before the operation.
+         */
+        public static final String OLD_DOCUMENT = "old_document";
+        /**
          * The {@code op} field is used to store the kind of operation on a record.
          */
         public static final String OPERATION = "op";
+        /**
+         * The {@code event_id} field is used to store a globally unique identifier for the event that was recorded in this stream record.
+         */
+        public static final String EVENT_ID = "event_id";
         /**
          * The {@code origin} field is used to store the information about the source of a record, including the
          * Kafka Connect partition and offset information.
@@ -73,6 +81,8 @@ public final class Envelope {
          * variations.
          */
         public static final String TIMESTAMP = "ts_ms";
+
+        public static final String KEY = "key";
     }
 
 }

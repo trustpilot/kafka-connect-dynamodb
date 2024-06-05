@@ -39,4 +39,12 @@ public class DynamoDbJson {
     public static Schema schema() {
         return builder().build();
     }
+
+    public static Schema optionalSchema() {
+        return SchemaBuilder.string()
+        .name(LOGICAL_NAME+".optional")
+        .version(1)
+        .optional()
+        .build();
+    }
 }
