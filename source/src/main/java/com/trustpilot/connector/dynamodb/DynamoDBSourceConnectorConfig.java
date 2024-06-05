@@ -62,10 +62,10 @@ public class DynamoDBSourceConnectorConfig extends AbstractConfig {
 	public static final String DST_TOPIC_PREFIX_DISPLAY = "Topic prefix";
 	public static final String DST_TOPIC_PREFIX_DEFAULT = "dynamodb-";
 
-	public static final String DST_TOPIC_NAMESPACE_MAP_CONFIG = "kafka.topic.namespace.map";
-	public static final String DST_TOPIC_NAMESPACE_MAP_DOC = "Define Kafka topic namespace map.";
-	public static final String DST_TOPIC_NAMESPACE_MAP_DISPLAY = "Topic namespace map";
-	public static final String DST_TOPIC_NAMESPACE_MAP_DEFAULT = null;
+	public static final String DST_TOPIC_MAP_CONFIG = "kafka.topic.map";
+	public static final String DST_TOPIC_MAP_DOC = "Define Kafka topic namespace map.";
+	public static final String DST_TOPIC_MAP_DISPLAY = "Topic namespace map";
+	public static final String DST_TOPIC_MAP_DEFAULT = null;
 
 	public static final String REDISCOVERY_PERIOD_CONFIG = "connect.dynamodb.rediscovery.period";
 	public static final String REDISCOVERY_PERIOD_DOC = "Time period in milliseconds to rediscover stream enabled DynamoDB tables";
@@ -194,14 +194,14 @@ public class DynamoDBSourceConnectorConfig extends AbstractConfig {
 						ConfigDef.Width.MEDIUM,
 						DST_TOPIC_PREFIX_DISPLAY)
 				
-				.define(DST_TOPIC_NAMESPACE_MAP_CONFIG,
+				.define(DST_TOPIC_MAP_CONFIG,
 						ConfigDef.Type.STRING,
-						DST_TOPIC_NAMESPACE_MAP_DEFAULT,
+						DST_TOPIC_MAP_DEFAULT,
 						ConfigDef.Importance.HIGH,
-						DST_TOPIC_NAMESPACE_MAP_DOC,
+						DST_TOPIC_MAP_DOC,
 						CONNECTOR_GROUP, 2,
 						ConfigDef.Width.LONG,
-						DST_TOPIC_NAMESPACE_MAP_DISPLAY)
+						DST_TOPIC_MAP_DISPLAY)
 
 				.define(SRC_INIT_SYNC_DELAY_CONFIG,
 						ConfigDef.Type.INT,
@@ -262,8 +262,8 @@ public class DynamoDBSourceConnectorConfig extends AbstractConfig {
 		return getString(DST_TOPIC_PREFIX_CONFIG);
 	}
 
-	public String getDestinationTopicNamespaceMap() {
-		return getString(DST_TOPIC_NAMESPACE_MAP_CONFIG);
+	public String getDestinationTopicMap() {
+		return getString(DST_TOPIC_MAP_CONFIG);
 	}
 
 	public long getRediscoveryPeriod() {
