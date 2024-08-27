@@ -28,7 +28,7 @@ public class ConfigTablesProvider extends TablesProviderBase implements TablesPr
                 final TableDescription tableDesc = client.describeTable(table).getTable();
 
                 if (this.hasValidConfig(tableDesc, table)) {
-                    LOGGER.info("Table to sync: {}", table);
+                    LOGGER.debug("Table to sync: {}", table);
                     consumableTables.add(table);
                 }
             }

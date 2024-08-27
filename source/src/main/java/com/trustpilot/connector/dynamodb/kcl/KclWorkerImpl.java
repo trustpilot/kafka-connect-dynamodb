@@ -77,7 +77,7 @@ public class KclWorkerImpl implements KclWorker {
                         cloudWatchClient);
 
 
-        LOGGER.info("Creating KCL worker for Stream: {} ApplicationName: {} WorkerId: {}",
+        LOGGER.debug("Creating KCL worker for Stream: {} ApplicationName: {} WorkerId: {}",
                 clientLibConfiguration.getStreamName(),
                 clientLibConfiguration.getApplicationName(),
                 clientLibConfiguration.getWorkerIdentifier()

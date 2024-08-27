@@ -110,7 +110,7 @@ public class DynamoDBSourceTask extends SourceTask {
     public void start(Map<String, String> configProperties) {
 
         DynamoDBSourceTaskConfig config = new DynamoDBSourceTaskConfig(configProperties);
-        LOGGER.info("Starting task for table: {}", config.getTableName());
+        LOGGER.debug("Starting task for table: {}", config.getTableName());
 
         LOGGER.debug("Getting DynamoDB description for table: {}", config.getTableName());
         if (client == null) {
@@ -126,7 +126,7 @@ public class DynamoDBSourceTask extends SourceTask {
 
         LOGGER.debug("Getting offset for table: {}", tableDesc.getTableName());
         setStateFromOffset();
-        LOGGER.info("Task status: {}", sourceInfo);
+        LOGGER.debug("Task status: {}", sourceInfo);
 
         LOGGER.debug("Initiating DynamoDB table scanner and record converter.");
         if (tableScanner == null) {
@@ -136,7 +136,7 @@ public class DynamoDBSourceTask extends SourceTask {
         }
         converter = new RecordConverter(tableDesc, config.getDestinationTopicPrefix(), config.getDestinationTopicMap());
 
-        LOGGER.info("Starting background KCL worker thread for table: {}", tableDesc.getTableName());
+        LOGGER.debug("Starting background KCL worker thread for table: {}", tableDesc.getTableName());
 
         AmazonDynamoDBStreams dynamoDBStreamsClient =  AwsClients.buildDynamoDbStreamsClient(
                 config.getAwsRegion(),
@@ -225,7 +225,7 @@ public class DynamoDBSourceTask extends SourceTask {
             Thread.sleep(initSyncDelay * 1000);
         }
 
-        LOGGER.info("Continuing INIT_SYNC {}", sourceInfo);
+        LOGGER.debug("Continuing INIT_SYNC {}", sourceInfo);
         ScanResult scanResult = tableScanner.getItems(sourceInfo.exclusiveStartKey);
 
         LinkedList<SourceRecord> result = new LinkedList<>();
@@ -261,7 +261,7 @@ public class DynamoDBSourceTask extends SourceTask {
 
 
         if (sourceInfo.initSyncStatus == InitSyncStatus.RUNNING) {
-            LOGGER.info(
+            LOGGER.debug(
                     "INIT_SYNC iteration returned {}. Status: {}", result.size(), sourceInfo);
         } else {
             LOGGER.info("INIT_SYNC FINISHED: {}", sourceInfo);

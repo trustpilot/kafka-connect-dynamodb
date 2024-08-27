@@ -131,7 +131,7 @@ public class KclRecordProcessor implements IRecordProcessor, IShutdownNotificati
 
         String firstProcessedSeqNo = records.get(0).getSequenceNumber();
         lastProcessedSeqNo = records.get(records.size() - 1).getSequenceNumber();
-        LOGGER.info("Added {} records to eventsQueue. Table: {} ShardID: {}, FirstSeqNo: {}, LastSeqNo: {}",
+        LOGGER.debug("Added {} records to eventsQueue. Table: {} ShardID: {}, FirstSeqNo: {}, LastSeqNo: {}",
                     records.size(),
                     tableName,
                     shardId,
@@ -152,7 +152,7 @@ public class KclRecordProcessor implements IRecordProcessor, IShutdownNotificati
 
             if (!lastCommittedRecordSequenceNumber.equals("")) {  // If at least one record was committed to Kafka
                 try {
-                    LOGGER.info("KCL checkpoint table: {} shardId: {} at sequenceNumber: {}",
+                    LOGGER.debug("KCL checkpoint table: {} shardId: {} at sequenceNumber: {}",
                                 tableName,
                                 shardId,
                                 lastCommittedRecordSequenceNumber);
@@ -233,7 +233,7 @@ public class KclRecordProcessor implements IRecordProcessor, IShutdownNotificati
                 shardId);
         shardRegister.remove(shardId);
 
-        LOGGER.info(
+        LOGGER.debug(
                 "Shard ended. All data committed. Checkpoint and proceed to next one. Table: {} ShardID: {}",
                 tableName,
                 shardId);

@@ -43,7 +43,7 @@ public class DynamoDBTablesProvider extends TablesProviderBase implements Tables
     }
 
     public List<String> getConsumableTables() {
-        LOGGER.info("Searching for tables with tag.key: {}", ingestionTagKey);
+        LOGGER.debug("Searching for tables with tag.key: {}", ingestionTagKey);
 
         final List<String> consumableTables = new LinkedList<>();
         GetResourcesRequest resourcesRequest = getGetResourcesRequest();
@@ -58,7 +58,7 @@ public class DynamoDBTablesProvider extends TablesProviderBase implements Tables
                     final TableDescription tableDesc = client.describeTable(tableName).getTable();
 
                     if (hasValidConfig(tableDesc, tableName)) {
-                        LOGGER.info("Table to sync: {}", tableName);
+                        LOGGER.debug("Table to sync: {}", tableName);
                         consumableTables.add(tableName);
                     }
                 }
