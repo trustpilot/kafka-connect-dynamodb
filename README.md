@@ -1,6 +1,13 @@
+# THIS REPO IS ARCHIVED
+
+Current source code for the dynamodb source connector is available in the [source-dynamodb](https://bitbucket.org/fetchrewards/source-dynamodb/) repo
+
+---
+
 [![Build Status](https://travis-ci.com/trustpilot/datalake-kafka-connect-dynamodb.svg?token=fhWdHVx5wocrF4axEby7&branch=master)](https://travis-ci.com/trustpilot/datalake-kafka-connect-dynamodb)
 
 # kafka-connect-dynamodb
+
 
 A [Kafka Connector](http://kafka.apache.org/documentation.html#connect) which implements a "source connector" for AWS DynamoDB table Streams. This source connector allows replicating DynamoDB tables into Kafka topics. Once data is in Kafka you can use various Kafka sink connectors to push this data into different destinations systems, e.g. - BigQuery for easy analytics.  
 
