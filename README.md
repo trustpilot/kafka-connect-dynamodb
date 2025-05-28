@@ -1,3 +1,5 @@
+## [May 2025] This repository is no longer maintained. Please refer to the fully managed DDB CDC connector ([Amazon DynamoDB CDC Source Connector](https://www.confluent.io/hub/confluentinc/DynamoDbCdcSource)) from Confluent instead.
+
 [![Build Status](https://travis-ci.com/trustpilot/datalake-kafka-connect-dynamodb.svg?token=fhWdHVx5wocrF4axEby7&branch=master)](https://travis-ci.com/trustpilot/datalake-kafka-connect-dynamodb)
 
 # kafka-connect-dynamodb
