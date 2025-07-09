@@ -17,6 +17,11 @@ public class DynamoDBSourceConnectorConfig extends AbstractConfig {
 	public static final String SRC_INIT_SYNC_DELAY_DISPLAY = "INIT_SYNC delay";
 	public static final int SRC_INIT_SYNC_DELAY_DEFAULT = 60;
 
+	public static final String SRC_INIT_SYNC_SKIP_CONFIG = "init.sync.skip";
+	public static final String SRC_INIT_SYNC_SKIP_DOC = "Define whether to skip INIT_SYNC of table.";
+	public static final String SRC_INIT_SYNC_SKIP_DISPLAY = "Skip INIT_SYNC";
+	public static final boolean SRC_INIT_SYNC_SKIP_DEFAULT = false;
+
   	public static final String AWS_REGION_CONFIG = "aws.region";
 	public static final String AWS_REGION_DOC = "Define AWS region.";
 	public static final String AWS_REGION_DISPLAY = "Region";
@@ -56,6 +61,11 @@ public class DynamoDBSourceConnectorConfig extends AbstractConfig {
 	public static final String SRC_KCL_TABLE_BILLING_MODE_DOC = "Define billing mode for internal table created by the KCL library. Default is provisioned.";
 	public static final String SRC_KCL_TABLE_BILLING_MODE_DISPLAY = "KCL table billing mode";
 	public static final String SRC_KCL_TABLE_BILLING_MODE_DEFAULT = "PROVISIONED";
+
+	public static final String AWS_ASSUME_ROLE_ARN_CONFIG = "aws.assume.role.arn";
+	public static final String AWS_ASSUME_ROLE_ARN_DOC = "Define which role arn the KCL/Dynamo Client should assume.";
+	public static final String AWS_ASSUME_ROLE_ARN_DISPLAY = "Assume Role Arn";
+	public static final String AWS_ASSUME_ROLE_ARN_DEFAULT = null;
 
 	public static final String DST_TOPIC_PREFIX_CONFIG = "kafka.topic.prefix";
 	public static final String DST_TOPIC_PREFIX_DOC = "Define Kafka topic destination prefix. End will be the name of a table.";
@@ -181,6 +191,15 @@ public class DynamoDBSourceConnectorConfig extends AbstractConfig {
 						ConfigDef.Width.MEDIUM,
 						SRC_KCL_TABLE_BILLING_MODE_DISPLAY)
 
+				.define(AWS_ASSUME_ROLE_ARN_CONFIG,
+						ConfigDef.Type.STRING,
+						AWS_ASSUME_ROLE_ARN_DEFAULT,
+						ConfigDef.Importance.LOW,
+						AWS_ASSUME_ROLE_ARN_DOC,
+						AWS_GROUP, 10,
+						ConfigDef.Width.LONG,
+						AWS_ASSUME_ROLE_ARN_DISPLAY)
+
 				.define(DST_TOPIC_PREFIX_CONFIG,
 						ConfigDef.Type.STRING,
 						DST_TOPIC_PREFIX_DEFAULT,
@@ -190,12 +209,21 @@ public class DynamoDBSourceConnectorConfig extends AbstractConfig {
 						ConfigDef.Width.MEDIUM,
 						DST_TOPIC_PREFIX_DISPLAY)
 
+				.define(SRC_INIT_SYNC_SKIP_CONFIG,
+						ConfigDef.Type.BOOLEAN,
+						SRC_INIT_SYNC_SKIP_DEFAULT,
+						ConfigDef.Importance.LOW,
+						SRC_INIT_SYNC_SKIP_DOC,
+						CONNECTOR_GROUP, 2,
+						ConfigDef.Width.MEDIUM,
+						SRC_INIT_SYNC_SKIP_DISPLAY)
+
 				.define(SRC_INIT_SYNC_DELAY_CONFIG,
 						ConfigDef.Type.INT,
 						SRC_INIT_SYNC_DELAY_DEFAULT,
 						ConfigDef.Importance.LOW,
 						SRC_INIT_SYNC_DELAY_DOC,
-						CONNECTOR_GROUP, 2,
+						CONNECTOR_GROUP, 3,
 						ConfigDef.Width.MEDIUM,
 						SRC_INIT_SYNC_DELAY_DISPLAY)
 
@@ -253,6 +281,10 @@ public class DynamoDBSourceConnectorConfig extends AbstractConfig {
 		return getLong(REDISCOVERY_PERIOD_CONFIG);
 	}
 
+	public boolean getInitSyncSkip() {
+		return (boolean)get(SRC_INIT_SYNC_SKIP_CONFIG);
+	}
+
 	public int getInitSyncDelay() {
 		return (int)get(SRC_INIT_SYNC_DELAY_CONFIG);
 	}
@@ -271,5 +303,9 @@ public class DynamoDBSourceConnectorConfig extends AbstractConfig {
 
 	public BillingMode getKCLTableBillingMode() {
 		return BillingMode.fromValue(getString(SRC_KCL_TABLE_BILLING_MODE_CONFIG));
+	}
+
+	public String getAwsAssumeRoleArn() {
+		return getString(AWS_ASSUME_ROLE_ARN_CONFIG);
 	}
 }

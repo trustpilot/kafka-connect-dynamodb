@@ -35,6 +35,7 @@ public class KclWorkerImplTests {
         String tableName = "testTableName1";
         String taskId = "task1";
         String serviceEndpoint = "http://localhost:8000";
+        Boolean isSyncSkip = false;
         BillingMode kclTableBillingMode = BillingMode.PROVISIONED;
 
         AmazonDynamoDB dynamoDBClient = Mockito.mock(AmazonDynamoDB.class);
@@ -43,7 +44,7 @@ public class KclWorkerImplTests {
         when(dynamoDBClient.describeTable(ArgumentMatchers.<DescribeTableRequest>any())).thenReturn(result);
 
         // Act
-        KinesisClientLibConfiguration clientLibConfiguration = kclWorker.getClientLibConfiguration(tableName, taskId, dynamoDBClient, serviceEndpoint, kclTableBillingMode);
+        KinesisClientLibConfiguration clientLibConfiguration = kclWorker.getClientLibConfiguration(tableName, taskId, dynamoDBClient, serviceEndpoint, isSyncSkip, kclTableBillingMode);
 
         // Assert
         assertEquals("datalake-KCL-testTableName1", clientLibConfiguration.getApplicationName());

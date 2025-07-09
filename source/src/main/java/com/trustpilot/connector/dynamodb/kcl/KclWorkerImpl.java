@@ -30,7 +30,6 @@ public class KclWorkerImpl implements KclWorker {
     private final AWSCredentialsProvider awsCredentialsProvider;
     private final ArrayBlockingQueue<KclRecordsWrapper> eventsQueue;
     private final ConcurrentHashMap<String, ShardInfo> recordProcessorsRegister;
-
     private volatile Thread thread;
     private volatile Worker worker;
 
@@ -49,13 +48,14 @@ public class KclWorkerImpl implements KclWorker {
                       String tableName,
                       String taskid,
                       String endpoint,
+                      Boolean isSkipSync,
                       BillingMode kclTableBillingMode) {
         IRecordProcessorFactory recordProcessorFactory = new KclRecordProcessorFactory(tableName, eventsQueue,
                 recordProcessorsRegister);
 
         KinesisClientLibConfiguration clientLibConfiguration = getClientLibConfiguration(tableName,
                 taskid,
-                dynamoDBClient, endpoint, kclTableBillingMode);
+                dynamoDBClient, endpoint, isSkipSync, kclTableBillingMode);
 
         AmazonDynamoDBStreamsAdapterClient adapterClient = new AmazonDynamoDBStreamsAdapterClient(dynamoDBStreamsClient);
 
@@ -123,8 +123,15 @@ public class KclWorkerImpl implements KclWorker {
                                                             String taskid,
                                                             AmazonDynamoDB dynamoDBClient,
                                                             String endpoint,
+                                                            Boolean isSkipSync,
                                                             BillingMode kclTableBillingMode) {
 
+        InitialPositionInStream initialPosition;
+        if (isSkipSync) {
+            initialPosition = InitialPositionInStream.LATEST;
+        } else {
+            initialPosition = InitialPositionInStream.TRIM_HORIZON;
+        }
         String streamArn = dynamoDBClient.describeTable(
                 new DescribeTableRequest()
                         .withTableName(tableName)).getTable().getLatestStreamArn();
@@ -141,7 +148,7 @@ public class KclWorkerImpl implements KclWorker {
 
                 // worker will use checkpoint tableName if available, otherwise it is safer
                 // to start at beginning of the stream
-                .withInitialPositionInStream(InitialPositionInStream.TRIM_HORIZON)
+                .withInitialPositionInStream(initialPosition)
 
                 // we want the maximum batch size to avoid network transfer latency overhead
                 .withMaxRecords(Constants.STREAMS_RECORDS_LIMIT)

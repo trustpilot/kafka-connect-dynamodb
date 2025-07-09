@@ -71,6 +71,14 @@ public class SourceInfo {
         lastInitSyncEnd = Instant.now(clock);
     }
 
+    public void skipInitSync() {
+        initSyncStatus = InitSyncStatus.SKIPPED;
+        lastInitSyncStart = Instant.ofEpochSecond(0);
+        lastInitSyncEnd = Instant.ofEpochSecond(0);;
+        exclusiveStartKey = null;
+        initSyncCount = 0L;
+    }
+
     private static final Schema STRUCT_SCHEMA = SchemaBuilder.struct()
                                                              .name(SchemaNameAdjuster
                                                                            .defaultAdjuster()

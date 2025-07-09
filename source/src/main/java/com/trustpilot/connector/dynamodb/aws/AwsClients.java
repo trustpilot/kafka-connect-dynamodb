@@ -5,6 +5,7 @@ import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
+import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
@@ -22,44 +23,56 @@ public class AwsClients {
     public static AmazonDynamoDB buildDynamoDbClient(String awsRegion,
                                                      String serviceEndpoint,
                                                      String awsAccessKeyID,
-                                                     String awsSecretKey) {
-
+                                                     String awsSecretKey,
+                                                     String awsAssumeRoleArn) {
 
         return (AmazonDynamoDB) configureBuilder(
                 AmazonDynamoDBClientBuilder.standard(),
                 awsRegion, serviceEndpoint,
                 awsAccessKeyID,
-                awsSecretKey)
+                awsSecretKey,
+                awsAssumeRoleArn)
                 .build();
     }
 
     public static AWSResourceGroupsTaggingAPI buildAWSResourceGroupsTaggingAPIClient(String awsRegion,
                                                                                      String serviceEndpoint,
                                                                                      String awsAccessKeyID,
-                                                                                     String awsSecretKey) {
+                                                                                     String awsSecretKey,
+                                                                                     String awsAssumeRoleArn) {
         return (AWSResourceGroupsTaggingAPI) configureBuilder(
                 AWSResourceGroupsTaggingAPIClientBuilder.standard(),
                 awsRegion, serviceEndpoint,
                 awsAccessKeyID,
-                awsSecretKey)
+                awsSecretKey,
+                awsAssumeRoleArn)
                 .build();
     }
 
     public static AmazonDynamoDBStreams buildDynamoDbStreamsClient(String awsRegion,
                                                                    String serviceEndpoint,
                                                                    String awsAccessKeyID,
-                                                                   String awsSecretKey) {
+                                                                   String awsSecretKey,
+                                                                   String awsAssumeRoleArn) {
         return (AmazonDynamoDBStreams) configureBuilder(
                 AmazonDynamoDBStreamsClientBuilder.standard(),
                 awsRegion, serviceEndpoint,
                 awsAccessKeyID,
-                awsSecretKey)
+                awsSecretKey,
+                awsAssumeRoleArn)
                 .build();
 
     }
 
-    public static AWSCredentialsProvider getCredentials(String awsAccessKeyID, String awsSecretKey) {
-        if (awsAccessKeyID == null || awsSecretKey == null) {
+    public static AWSCredentialsProvider getCredentials(String awsAccessKeyID,
+                                                        String awsSecretKey,
+                                                        String awsAssumeRoleArn) {
+        if (awsAssumeRoleArn != null ) {
+            LOGGER.debug("Using STSAssumeRoleSessionCredentialsProvider");
+            AWSCredentialsProvider awsCredentialsProviderChain = DefaultAWSCredentialsProviderChain.getInstance();
+            return new STSAssumeRoleSessionCredentialsProvider(awsCredentialsProviderChain,
+                    awsAssumeRoleArn, "kafkaconnect");
+        } else if (awsAccessKeyID == null || awsSecretKey == null) {
             LOGGER.debug("Using DefaultAWSCredentialsProviderChain");
 
             return DefaultAWSCredentialsProviderChain.getInstance();
@@ -75,9 +88,10 @@ public class AwsClients {
                                                      String awsRegion,
                                                      String serviceEndpoint,
                                                      String awsAccessKeyID,
-                                                     String awsSecretKey) {
+                                                     String awsSecretKey,
+                                                     String awsAssumeRoleArn) {
 
-        builder.withCredentials(getCredentials(awsAccessKeyID, awsSecretKey))
+        builder.withCredentials(getCredentials(awsAccessKeyID, awsSecretKey, awsAssumeRoleArn))
                 .withClientConfiguration(new ClientConfiguration().withThrottledRetries(true));
 
         if(serviceEndpoint != null && !serviceEndpoint.isEmpty()) {
