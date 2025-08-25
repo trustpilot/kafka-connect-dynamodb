@@ -48,6 +48,7 @@ public class KafkaConnectITBase {
     protected static final String AWS_REGION_CONFIG = "eu-west-3";
     protected static final String AWS_ACCESS_KEY_ID_CONFIG = "ABCD";
     protected static final String AWS_SECRET_KEY_CONFIG = "1234";
+    protected static final String AWS_ASSUME_ROLE_ARN_CONFIG = null;
     protected static final String SRC_DYNAMODB_TABLE_INGESTION_TAG_KEY_CONFIG = "datalake-ingest";
 
     private static Network network;
@@ -187,7 +188,8 @@ public class KafkaConnectITBase {
                 AWS_REGION_CONFIG,
                 dynamodb.getEndpoint(),
                 AWS_ACCESS_KEY_ID_CONFIG,
-                AWS_SECRET_KEY_CONFIG
+                AWS_SECRET_KEY_CONFIG,
+                AWS_ASSUME_ROLE_ARN_CONFIG
         );
     }
 
